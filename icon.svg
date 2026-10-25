@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Nexo">
+  <rect width="512" height="512" rx="112" fill="#0d0b10"/>
+  <rect x="56" y="56" width="400" height="400" rx="112" fill="#211c26" stroke="#3a3340" stroke-width="12"/>
+  <text x="256" y="350" text-anchor="middle" font-family="system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="286" font-weight="700" fill="#f3eef5">N</text>
+</svg>
