@@ -1,4 +1,4 @@
-const CACHE_NAME = "nexo-v5";
+const CACHE_NAME = "nexo-v6";
 const APP_FILES = [
   "./",
   "./index.html",
