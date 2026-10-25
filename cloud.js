@@ -16,12 +16,21 @@
   document.head.append(styles);
 
   function readConfig() { try { return JSON.parse(localStorage.getItem(CONFIG_KEY) || "null"); } catch { return null; } }
+  function isPublishableKey(key) {
+    if (key.startsWith("sb_publishable_")) return true;
+    if (key.startsWith("sb_secret_")) return false;
+    try {
+      const part=key.split(".")[1]; if(!part) return false;
+      const payload=JSON.parse(atob(part.replace(/-/g,"+").replace(/_/g,"/")));
+      return payload.role === "anon";
+    } catch { return false; }
+  }
   try {
     const token = new URL(location.href).searchParams.get("invite");
     if (token) localStorage.setItem(PENDING_INVITE, token);
   } catch {}
   function frame(title, body) {
-    root.innerHTML = '<header class="nc-row" style="align-items:center;justify-content:space-between"><div><span class="nc-tag">CUENTA E INVITACIONES · NEXO v0.5.0</span><h1>' + esc(title) + '</h1></div><button class="nc-small" data-action="local">Volver a espacios locales</button></header><p id="nc-message" class="' + (messageError ? "nc-error" : "nc-muted") + '" role="status">' + esc(messageText) + '</p>' + body;
+    root.innerHTML = '<header class="nc-row" style="align-items:center;justify-content:space-between"><div><span class="nc-tag">CUENTA E INVITACIONES · NEXO v0.5.1</span><h1>' + esc(title) + '</h1></div><button class="nc-small" data-action="local">Volver a espacios locales</button></header><p id="nc-message" class="' + (messageError ? "nc-error" : "nc-muted") + '" role="status">' + esc(messageText) + '</p>' + body;
   }
   function show(message, error) {
     messageText = message || "";
@@ -130,7 +139,7 @@
   }
   function shareText(name,token) {
     const join = new URL(INSTALL_URL); join.searchParams.set("invite",token);
-    return "Te invito a unirte a «" + name + "» en Nexo.\n\n1. Instala la PWA (no hace falta tienda): " + INSTALL_URL + "\n   iPhone/iPad: abre el enlace en Safari → Compartir → Añadir a pantalla de inicio.\n   Android: abre el enlace en Chrome → menú ⋮ → Instalar aplicación.\n\n2. Abre este enlace de invitación y crea tu cuenta o inicia sesión: " + join.href + "\n\nEste enlace sirve una vez y caduca en 7 días. Solo da acceso a esta dinámica; no permite ver las demás.";
+    return "Te invito a unirte a «" + name + "» en Nexo.\n\n1. Instala la PWA (no hace falta tienda): " + INSTALL_URL + "\n   iPhone/iPad: abre el enlace en Safari → Compartir → Añadir a pantalla de inicio.\n   Android: abre el enlace en Chrome → menú ⋮ → Instalar aplicación.\n\n2. Configura la conexión de Nexo con estos datos públicos del proyecto (la clave publicable no es una clave de administración):\n   URL: " + config.url + "\n   Clave publicable: " + config.key + "\n\n3. Abre este enlace de invitación y crea tu cuenta o inicia sesión: " + join.href + "\n\nEste enlace sirve una vez y caduca en 7 días. Solo da acceso a esta dinámica; no permite ver las demás.";
   }
   root.addEventListener("click", async e => {
     const b = e.target.closest("button"); if (!b) return;
@@ -167,7 +176,9 @@
     const f=e.target, v=new FormData(f);
     try {
       if(f.id==="nc-config") {
-        config={url:String(v.get("url")).replace(/\/$/,""),key:String(v.get("key")).trim()};
+        const key=String(v.get("key")).trim();
+        if(!isPublishableKey(key)) throw new Error("La clave debe ser la publicable (sb_publishable_…) o la antigua anon. No uses service_role ni sb_secret_.");
+        config={url:String(v.get("url")).replace(/\/$/,""),key};
         localStorage.setItem(CONFIG_KEY,JSON.stringify(config)); connect(); await render(); return;
       }
       if(f.id==="nc-auth") {

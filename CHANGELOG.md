@@ -2,6 +2,12 @@
 
 Las versiones se muestran también en Ajustes dentro de la PWA. Las notas de cada versión registran cambios visibles y pasos de configuración.
 
+## 0.5.1 — 2026-10-25
+
+- El texto de invitación incluye la URL del proyecto y su clave publicable para configurar el dispositivo invitado.
+- Se aceptan claves publicables actuales o anon antiguas; se rechazan service_role y sb_secret_.
+- Se actualizó el historial visible y la caché PWA a v0.5.1.
+
 ## 0.5.0 — 2026-10-25
 
 - Se puede editar una tarea DOM y cambiar instrucciones, frecuencia, repeticiones, fecha u hora límite.

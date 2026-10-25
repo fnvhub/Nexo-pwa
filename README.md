@@ -1,15 +1,15 @@
 # Nexo PWA
 
-Nexo es una PWA en español para acuerdos, tareas y perfiles dentro de dinámicas consensuadas. La versión publicada es **0.5.0**.
+Nexo es una PWA en español para acuerdos, tareas y perfiles dentro de dinámicas consensuadas. La versión publicada es **0.5.1**.
 
-## Qué incluye 0.5.0
+## Qué incluye 0.5.1
 
 - Tareas puntuales, diarias, semanales o mensuales, con repeticiones por periodo, fecha, hora límite e instrucciones.
 - Editar y borrar tareas desde el rol DOM. El borrado pide confirmación.
 - Acceso por cuenta Supabase, alta e inicio de sesión por correo.
 - Una invitación por enlace, vinculada a una dinámica exacta, de un solo uso y con caducidad de siete días.
 - Perfiles y tareas compartidos dentro de la dinámica; cada cuenta solo ve sus propias dinámicas y la DOM solo ve perfiles de las dinámicas que administra.
-- El texto de invitación incluye el enlace para instalar la PWA y los pasos para Android y iPhone/iPad.
+- El texto de invitación incluye el enlace para instalar la PWA, los pasos para Android/iPhone y la URL y clave publicable para conectar el dispositivo SUM.
 - Historial de versiones dentro de Ajustes y en CHANGELOG.md.
 
 ## Activar cuentas e invitaciones
@@ -21,7 +21,7 @@ La interfaz ya está publicada, pero el flujo compartido necesita conectarse a u
 3. En Supabase, configura Site URL como https://fnvhub.github.io/Nexo-pwa/ y añade esa misma dirección a Redirect URLs permitidas en Authentication → URL Configuration.
 4. Abre Nexo en https://fnvhub.github.io/Nexo-pwa/, entra y pulsa Cuenta e invitaciones. Pega la URL del proyecto y la clave publicable (publishable/anon). No introduzcas la clave service_role.
 5. Elige Crear dinámica DOM. En esa dinámica, pulsa Crear invitación y comparte el texto generado.
-6. La SUM instala Nexo desde el primer enlace del mensaje, abre el enlace de invitación, crea su cuenta o inicia sesión y completa su perfil.
+6. La SUM instala Nexo, copia en la pantalla de conexión la URL y clave publicable incluidas en el mensaje, abre el enlace de invitación, crea su cuenta o inicia sesión y completa su perfil.
 
 El enlace de invitación solo concede acceso a esa dinámica; no permite descubrir ni abrir las demás dinámicas de la DOM. Cada invitación se puede canjear una vez y expira en siete días. Si se pierde, la DOM crea otra.
 

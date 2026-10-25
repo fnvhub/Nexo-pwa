@@ -1,4 +1,4 @@
-const CACHE_NAME = "nexo-v8";
+const CACHE_NAME = "nexo-v9";
 const APP_FILES = [
   "./",
   "./index.html",
@@ -7,7 +7,7 @@ const APP_FILES = [
   "./icon-192.png",
   "./icon-512.png",
   "./mvp.js?v=0.5.0",
-  "./cloud.js?v=0.5.0"
+  "./cloud.js?v=0.5.1"
 ];
 
 self.addEventListener("install", (event) => {
