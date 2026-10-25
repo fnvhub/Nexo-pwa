@@ -29,69 +29,61 @@
       padding: 24px;
     }
     .card {
-      width: 100%;
-      max-width: 420px;
-      padding: 42px 28px;
-      border: 1px solid #302b35;
-      border-radius: 24px;
-      background: #151219;
-      text-align: center;
+      width: 100%; max-width: 420px; padding: 42px 28px;
+      border: 1px solid #302b35; border-radius: 24px;
+      background: #151219; text-align: center;
       box-shadow: 0 20px 60px rgba(0,0,0,.35);
     }
     .logo {
-      width: 72px;
-      height: 72px;
-      margin: 0 auto 22px;
-      border-radius: 22px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: #211c26;
-      border: 1px solid #3a3340;
-      font-size: 30px;
-      font-weight: 700;
+      width: 72px; height: 72px; margin: 0 auto 22px;
+      border-radius: 22px; display: flex; align-items: center;
+      justify-content: center; background: #211c26;
+      border: 1px solid #3a3340; font-size: 30px; font-weight: 700;
     }
     h1 { margin: 0; font-size: 38px; letter-spacing: -1px; }
     .intro { margin: 12px 0 30px; color: #aaa2ae; line-height: 1.5; }
     button {
-      width: 100%;
-      border: 0;
-      border-radius: 14px;
-      padding: 15px;
-      background: #f0e8f2;
-      color: #17131a;
-      font-size: 16px;
-      font-weight: 700;
-      cursor: pointer;
+      width: 100%; border: 0; border-radius: 14px; padding: 15px;
+      background: #f0e8f2; color: #17131a; font-size: 16px;
+      font-weight: 700; cursor: pointer;
     }
     button:active { transform: scale(.98); }
     button:focus-visible { outline: 3px solid #c6a7ff; outline-offset: 3px; }
     button.secondary {
-      margin-top: 12px;
-      background: #29232f;
-      color: #f3eef5;
+      margin-top: 12px; background: #29232f; color: #f3eef5;
       border: 1px solid #403847;
     }
     button[hidden] { display: none; }
-    .connection-status {
-      margin: 18px 0 0;
-      font-size: 13px;
-      color: #aaa2ae;
-    }
+    .connection-status { margin: 18px 0 0; font-size: 13px; color: #aaa2ae; }
     .connection-status::before {
-      content: "";
-      display: inline-block;
-      width: 8px;
-      height: 8px;
-      margin-right: 8px;
-      border-radius: 50%;
-      background: #67c587;
+      content: ""; display: inline-block; width: 8px; height: 8px;
+      margin-right: 8px; border-radius: 50%; background: #67c587;
       vertical-align: 1px;
     }
     .connection-status.is-offline::before { background: #e4a654; }
     .version { margin-top: 24px; font-size: 12px; color: #716a75; }
+    dialog {
+      width: min(92vw, 460px); max-height: 82vh; overflow: auto;
+      padding: 26px; border: 1px solid #403847; border-radius: 20px;
+      background: #151219; color: #f3eef5;
+      box-shadow: 0 20px 70px rgba(0,0,0,.55);
+    }
+    dialog::backdrop { background: rgba(0,0,0,.72); }
+    dialog h2 { margin: 0 0 8px; }
+    dialog h3 { margin: 24px 0 12px; font-size: 15px; }
+    .settings-version { margin: 0; color: #aaa2ae; font-size: 14px; }
+    .update-list { display: grid; gap: 10px; padding-left: 22px; }
+    .update-list li {
+      padding: 12px; border: 1px solid #302b35;
+      border-radius: 12px; background: #201b25;
+    }
+    .update-list strong { display: block; margin-bottom: 4px; }
+    .update-list time { color: #aaa2ae; font-size: 12px; }
+    .update-list p { margin: 8px 0 0; color: #d3ccd8; font-size: 14px; line-height: 1.45; }
+    dialog form { margin-top: 18px; }
     @media (max-width: 360px) {
       .card { padding: 34px 22px; }
+      dialog { padding: 20px; }
     }
   </style>
 </head>
@@ -103,18 +95,38 @@
       <p class="intro">Un espacio privado.</p>
       <button type="button" onclick="entrar()">Entrar</button>
       <button id="install-button" class="secondary" type="button" hidden>Instalar Nexo</button>
+      <button id="settings-button" class="secondary" type="button">Ajustes</button>
       <p id="connection-status" class="connection-status" role="status" aria-live="polite"></p>
-      <div class="version">Nexo · v0.2</div>
+      <div id="app-version" class="version">Nexo · v0.3.0</div>
     </section>
   </main>
+  <dialog id="settings-dialog" aria-labelledby="settings-title">
+    <h2 id="settings-title">Ajustes</h2>
+    <p id="settings-version" class="settings-version"></p>
+    <h3>Últimas actualizaciones</h3>
+    <ol id="update-history" class="update-list"></ol>
+    <form method="dialog"><button class="secondary" type="submit">Cerrar</button></form>
+  </dialog>
   <script>
+    const APP_VERSION = "0.3.0";
+    const RELEASE_HISTORY = [
+      { version: "0.3.0", date: "2026-10-25", note: "Se añadieron ajustes e historial de versiones." },
+      { version: "0.2.1", date: "2026-10-25", note: "Se simplificó el texto de portada." },
+      { version: "0.2.0", date: "2026-10-25", note: "Instalación PWA, estado de conexión y soporte sin conexión." },
+      { version: "0.1.0", date: "2026-10-25", note: "Primera versión de la portada de Nexo." }
+    ].slice(0, 10);
+
     let installPrompt = null;
     const installButton = document.getElementById("install-button");
+    const settingsButton = document.getElementById("settings-button");
+    const settingsDialog = document.getElementById("settings-dialog");
     const connectionStatus = document.getElementById("connection-status");
     const isAppleMobile = /iphone|ipad|ipod/i.test(navigator.userAgent) ||
       (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
     const isInstalled = window.matchMedia("(display-mode: standalone)").matches ||
       navigator.standalone === true;
+
+    document.getElementById("app-version").textContent = "Nexo · v" + APP_VERSION;
 
     function entrar() {
       alert("Nexo está en construcción.");
@@ -128,24 +140,42 @@
       connectionStatus.classList.toggle("is-offline", !isOnline);
     }
 
+    settingsButton.addEventListener("click", () => {
+      document.getElementById("settings-version").textContent = "Versión " + APP_VERSION;
+      const historyList = document.getElementById("update-history");
+      historyList.replaceChildren();
+      RELEASE_HISTORY.forEach((update) => {
+        const item = document.createElement("li");
+        const heading = document.createElement("strong");
+        heading.textContent = "v" + update.version;
+        const date = document.createElement("time");
+        date.dateTime = update.date;
+        date.textContent = new Intl.DateTimeFormat("es", {
+          day: "numeric", month: "short", year: "numeric", timeZone: "UTC"
+        }).format(new Date(update.date + "T12:00:00Z"));
+        const note = document.createElement("p");
+        note.textContent = update.note;
+        item.append(heading, date, note);
+        historyList.append(item);
+      });
+      settingsDialog.showModal();
+    });
+
     updateConnectionStatus();
     window.addEventListener("online", updateConnectionStatus);
     window.addEventListener("offline", updateConnectionStatus);
 
     if (isAppleMobile && !isInstalled) installButton.hidden = false;
-
     window.addEventListener("beforeinstallprompt", (event) => {
       event.preventDefault();
       installPrompt = event;
       installButton.hidden = isInstalled;
     });
-
     window.addEventListener("appinstalled", () => {
       installPrompt = null;
       installButton.hidden = true;
       connectionStatus.textContent = "Nexo está instalado";
     });
-
     installButton.addEventListener("click", async () => {
       if (installPrompt) {
         installPrompt.prompt();
