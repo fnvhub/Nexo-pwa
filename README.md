@@ -1,23 +1,42 @@
 # Nexo PWA
 
-Nexo es una PWA en español para llevar acuerdos y tareas dentro de una dinámica consensuada.
+Nexo es una PWA en español para acuerdos, tareas y perfiles dentro de dinámicas consensuadas. La versión publicada es **0.5.0**.
 
-## Estado actual
+## Qué incluye 0.5.0
 
-El prototipo publicado incluye portada instalable, funcionamiento offline, puerta de entrada con PIN opcional y un MVP local con espacios DOM/SUM, acuerdos, tareas, pausa de dinámica, nota privada y perfil por espacio.
+- Tareas puntuales, diarias, semanales o mensuales, con repeticiones por periodo, fecha, hora límite e instrucciones.
+- Editar y borrar tareas desde el rol DOM. El borrado pide confirmación.
+- Acceso por cuenta Supabase, alta e inicio de sesión por correo.
+- Una invitación por enlace, vinculada a una dinámica exacta, de un solo uso y con caducidad de siete días.
+- Perfiles y tareas compartidos dentro de la dinámica; cada cuenta solo ve sus propias dinámicas y la DOM solo ve perfiles de las dinámicas que administra.
+- El texto de invitación incluye el enlace para instalar la PWA y los pasos para Android y iPhone/iPad.
+- Historial de versiones dentro de Ajustes y en CHANGELOG.md.
 
-La interfaz está construida como JavaScript estático para preservar el despliegue actual en GitHub Pages. Los datos del MVP se guardan en `localStorage` de este navegador. Los espacios DOM y SUM separan los datos en la interfaz, pero **no son cuentas, no se comparten entre dispositivos y no constituyen una frontera de seguridad**. El PIN solo controla la pantalla de entrada y no cifra el almacenamiento. Usa datos ficticios hasta conectar un backend.
+## Activar cuentas e invitaciones
+
+La interfaz ya está publicada, pero el flujo compartido necesita conectarse a un proyecto Supabase propio. No requiere desplegar un servidor adicional.
+
+1. Crea un proyecto Supabase y activa la autenticación por correo electrónico.
+2. Abre SQL Editor en Supabase y ejecuta todo el archivo supabase/schema.sql.
+3. En Supabase, configura Site URL como https://fnvhub.github.io/Nexo-pwa/ y añade esa misma dirección a Redirect URLs permitidas en Authentication → URL Configuration.
+4. Abre Nexo en https://fnvhub.github.io/Nexo-pwa/, entra y pulsa Cuenta e invitaciones. Pega la URL del proyecto y la clave publicable (publishable/anon). No introduzcas la clave service_role.
+5. Elige Crear dinámica DOM. En esa dinámica, pulsa Crear invitación y comparte el texto generado.
+6. La SUM instala Nexo desde el primer enlace del mensaje, abre el enlace de invitación, crea su cuenta o inicia sesión y completa su perfil.
+
+El enlace de invitación solo concede acceso a esa dinámica; no permite descubrir ni abrir las demás dinámicas de la DOM. Cada invitación se puede canjear una vez y expira en siete días. Si se pierde, la DOM crea otra.
+
+La URL y la clave publicable se guardan en el navegador para poder reconectar el cliente. La clave publicable está diseñada para usarse en el navegador; el aislamiento real depende de las políticas RLS y funciones del SQL.
 
 ## Probar
 
-1. Abre [Nexo en GitHub Pages](https://fnvhub.github.io/Nexo-pwa/).
-2. Pulsa **Entrar**, elige usar PIN o continuar sin PIN.
-3. Crea un espacio como DOM o SUM y prueba acuerdos, tareas, pausa y perfil.
-4. En iPhone/iPad, usa Compartir → Añadir a pantalla de inicio. En Android, usa el menú del navegador → Instalar aplicación.
-5. La primera visita necesita conexión; después el service worker guarda la app para abrirla sin conexión.
+- Para probar la interfaz local, entra, crea un espacio local DOM y abre Tareas. Crea una tarea, luego usa Editar o Borrar.
+- Para probar invitaciones y separación real entre cuentas, completa los pasos de Supabase y usa dos correos distintos en dos sesiones/dispositivos.
+- La PWA se puede instalar desde Safari (Compartir → Añadir a pantalla de inicio) o Chrome (menú → Instalar aplicación).
 
-Para ejecutar una copia local, sirve la raíz del repositorio con cualquier servidor HTTP estático (por ejemplo `python -m http.server 8000`) y abre `http://localhost:8000`. Los service workers requieren HTTPS o localhost.
+## Espacios locales
 
-## Siguiente paso de seguridad
+Los espacios locales siguen disponibles para demostraciones sin backend. Sus datos se guardan solo en el navegador y no se comparten con las cuentas. Usa la opción Cuenta e invitaciones para acceder a perfiles y tareas compartidos.
 
-`supabase/schema.sql` es una base de esquema con Row Level Security: cada registro se consulta dentro de una dinámica a la que pertenece la cuenta autenticada, y las SUM solo ven su propia pertenencia. Debe revisarse, desplegarse y probarse con cuentas separadas antes de conectar el cliente. La app aún no se conecta a Supabase ni ofrece autenticación, invitaciones, sincronización ni cifrado de datos en reposo.
+## Límites actuales
+
+La primera conexión requiere internet y un proyecto Supabase configurado. El flujo remoto cubre cuentas, invitaciones, perfiles y tareas. Los acuerdos y las demás funciones avanzadas todavía no se sincronizan con Supabase. La app no usa la clave secreta service_role. Revisa las reglas de Auth y RLS antes de guardar datos personales reales.

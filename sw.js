@@ -1,11 +1,13 @@
-const CACHE_NAME = "nexo-v7";
+const CACHE_NAME = "nexo-v8";
 const APP_FILES = [
   "./",
   "./index.html",
   "./manifest.webmanifest",
   "./icon.svg",
   "./icon-192.png",
-  "./icon-512.png"
+  "./icon-512.png",
+  "./mvp.js?v=0.5.0",
+  "./cloud.js?v=0.5.0"
 ];
 
 self.addEventListener("install", (event) => {

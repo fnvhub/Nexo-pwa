@@ -145,11 +145,12 @@
   </dialog>
 
   <script>
-    const APP_VERSION = "0.4.0";
+    const APP_VERSION = "0.5.0";
     const ACCESS_MODE_KEY = "nexo.accessMode";
     const PIN_SALT_KEY = "nexo.pinSalt";
     const PIN_HASH_KEY = "nexo.pinHash";
     const RELEASE_HISTORY = [
+      { version: "0.5.0", date: "2026-10-25", note: "Edición y borrado de tareas; acceso por cuenta, invitaciones de un solo uso por dinámica y perfil compartido mediante Supabase; el mensaje de invitación incluye instalación de la PWA." },
       { version: "0.4.0", date: "2026-10-25", note: "PIN de acceso opcional, teclado oculto y gestión desde Ajustes." },
       { version: "0.3.1", date: "2026-10-25", note: "Ajustes y versión se muestran dentro de la aplicación." },
       { version: "0.3.0", date: "2026-10-25", note: "Se añadieron ajustes e historial de versiones." },
@@ -429,5 +430,5 @@
       navigator.serviceWorker.register("./sw.js").catch((error) => console.error("No se pudo registrar el service worker:", error));
     }
   </script>
-  <script src="./mvp.js?v=0.6.0"></script></body>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="./mvp.js?v=0.5.0"></script><script src="./cloud.js?v=0.5.0"></script></body>
 </html>
