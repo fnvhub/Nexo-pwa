@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="theme-color" content="#0d0b10">
   <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="./icon.svg" type="image/svg+xml">
   <meta name="description" content="Nexo — espacio privado para gestionar una dinámica compartida.">
   <title>Nexo</title>
 
@@ -121,7 +122,9 @@
 
   <script>
     if ("serviceWorker" in navigator) {
-      navigator.serviceWorker.register("./sw.js");
+      navigator.serviceWorker.register("./sw.js").catch((error) => {
+        console.error("No se pudo registrar el service worker:", error);
+      });
     }
   </script>
 
