@@ -1,4 +1,4 @@
--- Nexo v0.5.0 — secure, per-dynamic access and one-use SUM invitations.
+-- Nexo v0.6.0 — reviewed submissions and archival with per-dynamic RLS.
 -- Apply in Supabase SQL Editor before configuring the PWA.
 create schema if not exists extensions;
 create extension if not exists pgcrypto with schema extensions;
@@ -49,6 +49,7 @@ create table if not exists public.tasks (
   due_at timestamptz,
   status text not null default 'pending' check (status in ('pending','submitted','approved')),
   submitted_at timestamptz,
+  archived_at timestamptz,
   created_by uuid not null references auth.users(id),
   created_at timestamptz not null default now()
 );
@@ -74,10 +75,30 @@ create table if not exists public.task_completions (
   period_key text not null,
   occurrence integer not null check (occurrence between 1 and 99),
   completed_at timestamptz not null default now(),
+  review_status text not null default 'pending' check (review_status in ('pending','approved','rejected')),
+  reviewed_at timestamptz,
+  reviewed_by uuid references auth.users(id),
+  review_note text not null default '' check (char_length(review_note) <= 500),
   unique (task_id,user_id,period_key,occurrence),
   foreign key (dynamic_id,user_id) references public.memberships(dynamic_id,user_id) on delete cascade
 );
 create index if not exists task_completions_member_period_idx on public.task_completions(dynamic_id,user_id,period_key);
+
+-- Existing completions predate review and are retained as approved history.
+alter table public.tasks add column if not exists archived_at timestamptz;
+alter table public.task_completions add column if not exists review_status text not null default 'approved';
+alter table public.task_completions add column if not exists reviewed_at timestamptz;
+alter table public.task_completions add column if not exists reviewed_by uuid references auth.users(id);
+alter table public.task_completions add column if not exists review_note text not null default '';
+alter table public.task_completions alter column review_status set default 'pending';
+do $$ begin
+  if not exists (select 1 from pg_constraint where conname='task_completions_review_status_allowed' and conrelid='public.task_completions'::regclass) then
+    alter table public.task_completions add constraint task_completions_review_status_allowed check (review_status in ('pending','approved','rejected'));
+  end if;
+  if not exists (select 1 from pg_constraint where conname='task_completions_review_note_length' and conrelid='public.task_completions'::regclass) then
+    alter table public.task_completions add constraint task_completions_review_note_length check (char_length(review_note) <= 500);
+  end if;
+end $$;
 
 -- Raw invite tokens are never stored or readable by app clients; only a SHA-256 hash is stored.
 create table if not exists public.dynamic_invites (
@@ -162,16 +183,31 @@ begin
   if auth.uid() is null then raise exception 'Authentication required'; end if;
   select * into task_row from public.tasks where id=target_task for update;
   if not found or not public.is_dynamic_sum(task_row.dynamic_id) then raise exception 'SUM membership required'; end if;
+  if task_row.archived_at is not null then raise exception 'Task is archived'; end if;
+  if exists(select 1 from public.dynamics where id=task_row.dynamic_id and paused) then raise exception 'Dynamic is paused'; end if;
+  if task_row.frequency='once' and exists(select 1 from public.task_completions where task_id=target_task and user_id=auth.uid() and review_status='approved') then raise exception 'Task is already approved'; end if;
   if task_row.frequency='once' then key:='once';
   elsif task_row.frequency='monthly' then key:=to_char(now() at time zone 'UTC','YYYY-MM');
   elsif task_row.frequency='weekly' then key:=to_char(date_trunc('week',now() at time zone 'UTC')::date,'YYYY-MM-DD');
   else key:=to_char(now() at time zone 'UTC','YYYY-MM-DD'); end if;
-  select count(*) into n from public.task_completions where task_id=target_task and user_id=auth.uid() and period_key=key;
+  select count(*) into n from public.task_completions where task_id=target_task and user_id=auth.uid() and period_key=key and review_status <> 'rejected';
   if n >= task_row.required_count then raise exception 'Task frequency limit reached for this period'; end if;
-  n:=n+1;
-  insert into public.task_completions(dynamic_id,task_id,user_id,period_key,occurrence)
-  values(task_row.dynamic_id,target_task,auth.uid(),key,n);
+  select coalesce(max(occurrence),0)+1 into n from public.task_completions where task_id=target_task and user_id=auth.uid() and period_key=key;
+  insert into public.task_completions(dynamic_id,task_id,user_id,period_key,occurrence,review_status)
+  values(task_row.dynamic_id,target_task,auth.uid(),key,n,'pending');
   return n;
+end $$;
+
+create or replace function public.review_task_completion(target_completion uuid, decision text, note text default '')
+returns void language plpgsql security definer set search_path = ''
+as $$
+declare completion_row public.task_completions%rowtype;
+begin
+  if auth.uid() is null or decision not in ('approved','rejected') then raise exception 'Invalid review'; end if;
+  select * into completion_row from public.task_completions where id=target_completion for update;
+  if not found or not public.is_dynamic_dom(completion_row.dynamic_id) then raise exception 'DOM membership required'; end if;
+  if completion_row.review_status <> 'pending' or completion_row.user_id=auth.uid() then raise exception 'Submission cannot be reviewed by this member'; end if;
+  update public.task_completions set review_status=decision, reviewed_at=now(), reviewed_by=auth.uid(), review_note=left(coalesce(note,''),500) where id=target_completion;
 end $$;
 
 revoke all on function public.create_dynamic(text) from public;
@@ -182,6 +218,8 @@ grant execute on function public.create_dynamic(text) to authenticated;
 grant execute on function public.create_dynamic_invite(uuid) to authenticated;
 grant execute on function public.accept_dynamic_invite(text) to authenticated;
 grant execute on function public.record_task_completion(uuid) to authenticated;
+revoke all on function public.review_task_completion(uuid,text,text) from public;
+grant execute on function public.review_task_completion(uuid,text,text) to authenticated;
 
 alter table public.dynamics enable row level security;
 alter table public.memberships enable row level security;
@@ -228,6 +266,24 @@ revoke all on public.dynamic_invites from anon, authenticated;
 grant usage on schema public to authenticated;
 grant select on public.dynamics,public.memberships,public.agreements,public.tasks,public.task_completions,public.profiles to authenticated;
 grant insert,update on public.profiles to authenticated;
-grant insert,update,delete on public.tasks to authenticated;
+revoke insert on public.tasks from anon, authenticated;
+grant insert (dynamic_id,title,instructions,frequency,required_count,due_date,deadline_time,created_by) on public.tasks to authenticated;
 grant insert,update,delete on public.agreements to authenticated;
+
+-- Task metadata and archival are DOM-managed. Deletes and direct completion edits are forbidden.
+revoke update, delete on public.tasks from anon, authenticated;
+revoke delete on public.tasks from anon, authenticated;
+grant update (title, instructions, frequency, required_count, due_date, deadline_time, archived_at) on public.tasks to authenticated;
+revoke update, delete on public.agreements from anon, authenticated;
+revoke update, delete on public.task_completions from anon, authenticated;
+
+drop policy if exists tasks_dom_insert on public.tasks;
+create policy tasks_dom_insert on public.tasks for insert to authenticated
+  with check (public.is_dynamic_dom(dynamic_id) and created_by=(select auth.uid())
+    and not exists (select 1 from public.dynamics d where d.id=dynamic_id and d.paused));
+drop policy if exists tasks_dom_update on public.tasks;
+create policy tasks_dom_update on public.tasks for update to authenticated
+  using (public.is_dynamic_dom(dynamic_id))
+  with check (public.is_dynamic_dom(dynamic_id)
+    and not exists (select 1 from public.dynamics d where d.id=dynamic_id and d.paused));
 

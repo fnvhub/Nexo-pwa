@@ -10,7 +10,7 @@
   const INSTALL_URL = "https://fnvhub.github.io/Nexo-pwa/";
   const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
   let config = readConfig(), client = null, user = null, activeDynamic = null;
-  let role = "", editingId = null, deleteId = null, messageText = "", messageError = false;
+  let role = "", editingId = null, archiveId = null, messageText = "", messageError = false;
   const styles = document.createElement("style");
   styles.textContent = "#nexo-cloud{color:#f3eef5}#nexo-cloud[hidden]{display:none}.nc-card{padding:18px;margin:12px 0;border:1px solid #403847;background:#19151e;border-radius:16px}.nc-card h2{margin:0 0 10px;font-size:20px}.nc-muted{color:#aaa2ae;font-size:14px;line-height:1.5}.nc-form{display:grid;gap:10px;margin:14px 0}.nc-form input,.nc-form textarea,.nc-form select{width:100%;padding:12px;border-radius:11px;border:1px solid #514958;background:#100e13;color:#f3eef5;font:inherit}.nc-form textarea{min-height:80px}.nc-row{display:flex;gap:9px;flex-wrap:wrap}.nc-row button,.nc-small{width:auto;min-height:40px;padding:9px 13px;background:#29232f;color:#f3eef5;border:1px solid #403847;border-radius:12px;font-size:14px}.nc-alert{padding:12px;border-radius:12px;background:#2a2013;color:#f3d4a4;font-size:13px;line-height:1.5}.nc-item{padding:13px 0;border-top:1px solid #302b35}.nc-item p{margin:5px 0;color:#aaa2ae}.nc-error{color:#ffb3b3}.nc-success{color:#b8e4c8}.nc-tag{font-size:12px;color:#c9a9ff}";
   document.head.append(styles);
@@ -30,7 +30,7 @@
     if (token) localStorage.setItem(PENDING_INVITE, token);
   } catch {}
   function frame(title, body) {
-    root.innerHTML = '<header class="nc-row" style="align-items:center;justify-content:space-between"><div><span class="nc-tag">CUENTA E INVITACIONES · NEXO v0.5.1</span><h1>' + esc(title) + '</h1></div><button class="nc-small" data-action="local">Volver a espacios locales</button></header><p id="nc-message" class="' + (messageError ? "nc-error" : "nc-muted") + '" role="status">' + esc(messageText) + '</p>' + body;
+    root.innerHTML = '<header class="nc-row" style="align-items:center;justify-content:space-between"><div><span class="nc-tag">CUENTA E INVITACIONES · NEXO v0.6.0</span><h1>' + esc(title) + '</h1></div><button class="nc-small" data-action="local">Volver a espacios locales</button></header><p id="nc-message" class="' + (messageError ? "nc-error" : "nc-muted") + '" role="status">' + esc(messageText) + '</p>' + body;
   }
   function show(message, error) {
     messageText = message || "";
@@ -115,7 +115,7 @@
     const results = await Promise.all([
       client.from("tasks").select("*").eq("dynamic_id",id).order("created_at"),
       client.from("profiles").select("user_id,display_name,address_style,preferences,limits").eq("dynamic_id",id),
-      client.from("task_completions").select("task_id,user_id,period_key,completed_at").eq("dynamic_id",id)
+      client.from("task_completions").select("id,task_id,user_id,period_key,occurrence,completed_at,review_status,reviewed_at,reviewed_by,review_note").eq("dynamic_id",id).order("completed_at")
     ]);
     const err = results.find(r => r.error);
     if (err) return frame(d.name, '<p class="nc-error">' + esc(err.error.message) + '</p>');
@@ -127,10 +127,14 @@
     if (role === "DOM") taskForm = '<section class="nc-card"><h2>' + (edit ? "Editar tarea" : "Nueva tarea") + '</h2><form id="nc-task" class="nc-form"><label>Qué tiene que hacer<input name="title" required maxlength="120" value="' + esc(edit?.title || "") + '"></label><label>Instrucciones claras<textarea name="instructions" required minlength="10" maxlength="1000">' + esc(edit?.instructions || "") + '</textarea></label><label>Frecuencia<select name="frequency"><option value="once" ' + (!edit || edit.frequency==="once"?"selected":"") + '>Puntual</option><option value="daily" ' + (edit?.frequency==="daily"?"selected":"") + '>Diaria</option><option value="weekly" ' + (edit?.frequency==="weekly"?"selected":"") + '>Semanal</option><option value="monthly" ' + (edit?.frequency==="monthly"?"selected":"") + '>Mensual</option></select></label><label>Veces por periodo<input name="required_count" type="number" min="1" max="99" value="' + esc(edit?.required_count || 1) + '"></label><label>Fecha límite<input name="due_date" type="date" value="' + esc(edit?.due_date || "") + '"></label><label>Hora límite<input name="deadline_time" type="time" value="' + esc(edit?.deadline_time || "") + '"></label><div class="nc-row"><button>' + (edit ? "Guardar cambios" : "Asignar tarea") + '</button>' + (edit ? '<button type="button" class="nc-small" data-action="cancel-edit">Cancelar</button>' : "") + '</div></form></section>';
     const taskHtml = tasks.map(t => {
       const key = period(t), target = t.frequency === "once" ? 1 : Number(t.required_count) || 1;
-      const mine = completions.filter(c => c.task_id === t.id && c.period_key === key && c.user_id === user.id).length;
-      const theirs = completions.filter(c => c.task_id === t.id && c.period_key === key);
+      const records = completions.filter(c => c.task_id === t.id);
+      const mine = records.filter(c => c.period_key === key && c.user_id === user.id && c.review_status === "approved").length;
+      const pending = records.filter(c => c.review_status === "pending");
+      const rejected = records.filter(c => c.period_key === key && c.user_id === user.id && c.review_status === "rejected").length;
       const labels = {once:"Puntual",daily:"Diaria",weekly:"Semanal",monthly:"Mensual"};
-      return '<article class="nc-item"><strong>' + esc(t.title) + '</strong><p><strong>Instrucciones:</strong> ' + esc(t.instructions) + '</p><p>' + (labels[t.frequency] || "Puntual") + ' · ' + mine + '/' + target + ' veces este periodo</p><p>' + (t.due_date ? "Fecha límite: " + esc(t.due_date) : "Sin fecha límite") + (t.deadline_time ? " · Hora límite: " + esc(t.deadline_time) : "") + '</p>' + (role==="SUM" && mine<target ? '<button data-action="complete" data-id="' + esc(t.id) + '" data-period="' + esc(key) + '">Marcar una vez como hecha</button>' : "") + (role==="DOM" ? '<p class="nc-muted">' + (theirs.map(c => esc(nameFor(c.user_id)) + ": hecha").join(" · ") || "Aún sin registros") + '</p><div class="nc-row"><button class="nc-small" data-action="edit" data-id="' + esc(t.id) + '">Editar</button><button class="nc-small" data-action="ask-delete" data-id="' + esc(t.id) + '">Borrar</button></div>' + (deleteId===t.id ? '<p class="nc-alert">¿Borrar esta tarea y su historial? No se puede deshacer.</p><div class="nc-row"><button class="nc-small" data-action="delete" data-id="' + esc(t.id) + '">Sí, borrar</button><button class="nc-small" data-action="cancel-delete">Cancelar</button></div>' : "") : "") + '</article>';
+      const recordsHtml = records.map(c => '<p>' + esc(nameFor(c.user_id)) + ' · ' + ({pending:"Pendiente de revisión",approved:"Aprobada",rejected:"Rechazada"}[c.review_status] || "Enviada") + (c.review_note ? ' · ' + esc(c.review_note) : "") + '</p>').join("");
+      const reviewHtml = role === "DOM" ? pending.map(c => '<div class="nc-item" data-review-row="' + esc(c.id) + '"><p>Envío pendiente de ' + esc(nameFor(c.user_id)) + ' · ' + esc(c.completed_at) + '</p><label>Nota opcional<input data-review-note maxlength="500"></label><div class="nc-row"><button data-action="review" data-id="' + esc(c.id) + '" data-decision="approved">Validar</button><button class="nc-small" data-action="review" data-id="' + esc(c.id) + '" data-decision="rejected">Rechazar</button></div></div>').join("") : "";
+      return '<article class="nc-item"><strong>' + esc(t.title) + (t.archived_at ? ' · Archivada' : '') + '</strong><p><strong>Instrucciones:</strong> ' + esc(t.instructions) + '</p><p>' + (labels[t.frequency] || "Puntual") + ' · ' + mine + '/' + target + ' aprobadas este periodo</p><p>' + (t.due_date ? "Fecha límite: " + esc(t.due_date) : "Sin fecha límite") + (t.deadline_time ? " · Hora límite: " + esc(t.deadline_time) : "") + '</p>' + (role==="SUM" ? '<p>' + (rejected ? "Último envío rechazado; puedes volver a enviarlo." : "") + (records.some(c => c.user_id === user.id && c.period_key === key && c.review_status === "pending") ? "En revisión." : "") + '</p>' + (mine<target && !t.archived_at && !d.paused && !records.some(c => c.user_id === user.id && c.period_key === key && c.review_status === "pending") ? '<button data-action="complete" data-id="' + esc(t.id) + '">Enviar para revisión</button>' : "") : '<details><summary>Historial de envíos</summary>' + (recordsHtml || '<p class="nc-muted">Sin envíos</p>') + '</details>' + reviewHtml) + (role==="DOM" && !t.archived_at ? (archiveId===t.id ? '<p class="nc-alert">Al archivar, SUM dejará de poder enviar cumplimientos. Se conserva el historial.</p><div class="nc-row"><button class="nc-small" data-action="archive" data-id="' + esc(t.id) + '">Confirmar archivo</button><button class="nc-small" data-action="cancel-archive">Cancelar</button></div>' : '<div class="nc-row"><button class="nc-small" data-action="edit" data-id="' + esc(t.id) + '">Editar</button><button class="nc-small" data-action="ask-archive" data-id="' + esc(t.id) + '">Archivar</button></div>') : "") + '</article>';
     }).join("") || '<p class="nc-muted">Todavía no hay tareas.</p>';
     const profileHtml = role === "DOM"
       ? '<section class="nc-card"><h2>Perfiles de esta dinámica</h2>' + (profiles.map(p => '<article class="nc-item"><strong>' + esc(p.display_name || "Perfil sin nombre") + '</strong><p>' + esc(p.address_style || "") + '</p><p>' + esc(p.preferences || "") + '</p><p>' + esc(p.limits || "") + '</p></article>').join("") || '<p class="nc-muted">La SUM aún no ha completado su perfil.</p>') + '</section>'
@@ -147,7 +151,7 @@
       switch (b.dataset.action) {
         case "local": root.hidden=true; local.hidden=false; return;
         case "config": client=null; renderSetup(); return;
-        case "home": activeDynamic=null; editingId=null; deleteId=null; await renderHome(); return;
+        case "home": activeDynamic=null; editingId=null; archiveId=null; await renderHome(); return;
         case "signout": await client.auth.signOut(); user=null; activeDynamic=null; await render(); return;
         case "open": activeDynamic=b.dataset.id; role=b.dataset.role; await renderDynamic(); return;
         case "invite": {
@@ -159,11 +163,16 @@
         }
         case "edit": editingId=b.dataset.id; await renderDynamic(); return;
         case "cancel-edit": editingId=null; await renderDynamic(); return;
-        case "ask-delete": deleteId=b.dataset.id; await renderDynamic(); return;
-        case "cancel-delete": deleteId=null; await renderDynamic(); return;
-        case "delete": {
-          const {error}=await client.from("tasks").delete().eq("id",b.dataset.id).eq("dynamic_id",activeDynamic);
-          if(error) throw error; deleteId=null; editingId=null; await renderDynamic(); return;
+        case "ask-archive": archiveId=b.dataset.id; await renderDynamic(); return;
+        case "cancel-archive": archiveId=null; await renderDynamic(); return;
+        case "archive": {
+          const {error}=await client.from("tasks").update({archived_at:new Date().toISOString()}).eq("id",b.dataset.id).eq("dynamic_id",activeDynamic);
+          if(error) throw error; editingId=null; archiveId=null; await renderDynamic(); return;
+        }
+        case "review": {
+          const row=b.closest("[data-review-row]");
+          await rpc("review_task_completion",{target_completion:b.dataset.id,decision:b.dataset.decision,note:row.querySelector("[data-review-note]").value});
+          await renderDynamic(); return;
         }
         case "complete": {
           await rpc("record_task_completion",{target_task:b.dataset.id}); await renderDynamic(); return;
@@ -202,7 +211,8 @@
       if(f.id==="nc-task") {
         const frequency=String(v.get("frequency"));
         const t={dynamic_id:activeDynamic,title:String(v.get("title")).trim(),instructions:String(v.get("instructions")).trim(),frequency,required_count:frequency==="once"?1:Number(v.get("required_count"))||1,due_date:v.get("due_date")||null,deadline_time:v.get("deadline_time")||null};
-        const result=editingId ? await client.from("tasks").update(t).eq("id",editingId).eq("dynamic_id",activeDynamic) : await client.from("tasks").insert({...t,created_by:user.id});
+        const {dynamic_id,...changes}=t;
+        const result=editingId ? await client.from("tasks").update(changes).eq("id",editingId).eq("dynamic_id",activeDynamic) : await client.from("tasks").insert({...t,created_by:user.id});
         if(result.error) throw result.error; editingId=null; await renderDynamic(); return;
       }
     } catch(err) { show(err.message || String(err),true); }

@@ -1,42 +1,34 @@
 # Nexo PWA
 
-Nexo es una PWA en español para acuerdos, tareas y perfiles dentro de dinámicas consensuadas. La versión publicada es **0.5.1**.
+Nexo es una PWA móvil en español para coordinar tareas y perfiles dentro de dinámicas compartidas. Esta fase publica la versión **0.6.0** y amplía el flujo de tareas compartidas con revisión explícita.
 
-## Qué incluye 0.5.1
+## Funciones disponibles
 
-- Tareas puntuales, diarias, semanales o mensuales, con repeticiones por periodo, fecha, hora límite e instrucciones.
-- Editar y borrar tareas desde el rol DOM. El borrado pide confirmación.
-- Acceso por cuenta Supabase, alta e inicio de sesión por correo.
-- Una invitación por enlace, vinculada a una dinámica exacta, de un solo uso y con caducidad de siete días.
-- Perfiles y tareas compartidos dentro de la dinámica; cada cuenta solo ve sus propias dinámicas y la DOM solo ve perfiles de las dinámicas que administra.
-- El texto de invitación incluye el enlace para instalar la PWA, los pasos para Android/iPhone y la URL y clave publicable para conectar el dispositivo SUM.
-- Historial de versiones dentro de Ajustes y en CHANGELOG.md.
+- Cuentas Supabase e invitaciones de un solo uso vinculadas a una dinámica.
+- Lecturas aisladas por membership y dinámica mediante Row Level Security.
+- Tareas puntuales, diarias, semanales o mensuales con meta, instrucciones y vencimiento opcional.
+- La persona SUM envía cada cumplimiento. Queda pendiente hasta que la persona DOM lo valida o rechaza.
+- Las revisiones conservan autor, hora y nota opcional. El registro de prueba es solo el estado del flujo; Nexo no admite archivos multimedia ni enlaces de evidencia.
+- DOM archiva tareas en lugar de borrar su historial. Las acciones no se envían mientras la dinámica está pausada.
+- Espacios locales de demostración: sus datos permanecen en el navegador y no se sincronizan.
 
-## Activar cuentas e invitaciones
-
-La interfaz ya está publicada, pero el flujo compartido necesita conectarse a un proyecto Supabase propio. No requiere desplegar un servidor adicional.
+## Activar o actualizar Supabase
 
 1. Crea un proyecto Supabase y activa la autenticación por correo electrónico.
-2. Abre SQL Editor en Supabase y ejecuta todo el archivo supabase/schema.sql.
-3. En Supabase, configura Site URL como https://fnvhub.github.io/Nexo-pwa/ y añade esa misma dirección a Redirect URLs permitidas en Authentication → URL Configuration.
-4. Abre Nexo en https://fnvhub.github.io/Nexo-pwa/, entra y pulsa Cuenta e invitaciones. Pega la URL del proyecto y la clave publicable (publishable/anon). No introduzcas la clave service_role.
-5. Elige Crear dinámica DOM. En esa dinámica, pulsa Crear invitación y comparte el texto generado.
-6. La SUM instala Nexo, copia en la pantalla de conexión la URL y clave publicable incluidas en el mensaje, abre el enlace de invitación, crea su cuenta o inicia sesión y completa su perfil.
+2. Ejecuta el archivo completo `supabase/schema.sql` en SQL Editor. Es idempotente para la estructura existente y conserva los cumplimientos anteriores como historial aprobado.
+3. Configura Site URL y Redirect URLs con `https://fnvhub.github.io/Nexo-pwa/` en Authentication → URL Configuration.
+4. En Cuenta e invitaciones, configura la URL del proyecto y su clave publicable (`sb_publishable_…` o la antigua `anon`). No uses `service_role` ni `sb_secret_`.
+5. DOM crea una dinámica, genera una invitación y la comparte con SUM. La persona invitada configura el mismo proyecto y canjea el enlace con su cuenta.
 
-El enlace de invitación solo concede acceso a esa dinámica; no permite descubrir ni abrir las demás dinámicas de la DOM. Cada invitación se puede canjear una vez y expira en siete días. Si se pierde, la DOM crea otra.
+La sincronización compartida necesita Supabase configurado, una sesión autenticada y conexión. Sin ello, los espacios locales solo existen en el dispositivo. La aplicación no incluye claves administrativas.
 
-La URL y la clave publicable se guardan en el navegador para poder reconectar el cliente. La clave publicable está diseñada para usarse en el navegador; el aislamiento real depende de las políticas RLS y funciones del SQL.
+## Alcance y límites
 
-## Probar
+- El flujo compartido cubre perfiles, tareas, envíos y revisiones. Acuerdos versionados, aceptación explícita, color por dinámica, puntos y paneles completos aún no están conectados.
+- No hay sincronización en tiempo real ni cola offline para escrituras. Las acciones requieren conexión; no se presentan como sincronizadas hasta que Supabase las confirma.
+- Las consecuencias son información acordada; no se ejecutan automáticamente.
+- La actualización del esquema debe probarse primero en un proyecto Supabase de ensayo. No se ha probado contra la instancia Supabase del usuario desde este entorno.
 
-- Para probar la interfaz local, entra, crea un espacio local DOM y abre Tareas. Crea una tarea, luego usa Editar o Borrar.
-- Para probar invitaciones y separación real entre cuentas, completa los pasos de Supabase y usa dos correos distintos en dos sesiones/dispositivos.
-- La PWA se puede instalar desde Safari (Compartir → Añadir a pantalla de inicio) o Chrome (menú → Instalar aplicación).
+## PWA
 
-## Espacios locales
-
-Los espacios locales siguen disponibles para demostraciones sin backend. Sus datos se guardan solo en el navegador y no se comparten con las cuentas. Usa la opción Cuenta e invitaciones para acceder a perfiles y tareas compartidos.
-
-## Límites actuales
-
-La primera conexión requiere internet y un proyecto Supabase configurado. El flujo remoto cubre cuentas, invitaciones, perfiles y tareas. Los acuerdos y las demás funciones avanzadas todavía no se sincronizan con Supabase. La app no usa la clave secreta service_role. Revisa las reglas de Auth y RLS antes de guardar datos personales reales.
+La PWA se puede instalar desde Safari (Compartir → Añadir a pantalla de inicio) o Chrome (menú → Instalar aplicación). El service worker reemplaza sus cachés versionadas al activar una actualización.

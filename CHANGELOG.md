@@ -2,6 +2,14 @@
 
 Las versiones se muestran también en Ajustes dentro de la PWA. Las notas de cada versión registran cambios visibles y pasos de configuración.
 
+## 0.6.0 — 2026-10-31
+
+- Los envíos de tareas compartidas quedan pendientes hasta que una persona DOM los valida o rechaza.
+- La revisión guarda autor, fecha y una nota opcional; no guarda archivos ni enlaces de evidencia.
+- Las tareas se archivan en lugar de borrarse, y conservan su historial de envíos.
+- El servidor bloquea envíos en dinámicas pausadas y prohíbe cambiar revisiones desde el cliente.
+- Para activar el flujo, vuelve a ejecutar `supabase/schema.sql` en el proyecto Supabase.
+
 ## 0.5.1 — 2026-10-25
 
 - El texto de invitación incluye la URL del proyecto y su clave publicable para configurar el dispositivo invitado.
