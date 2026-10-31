@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="theme-color" content="#0d0b10">
+  <meta name="theme-color" content="#f5f1eb">
   <meta name="description" content="Un espacio privado.">
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" href="./icon.svg" type="image/svg+xml">
@@ -65,6 +65,54 @@
     .update-list p { margin: 8px 0 0; color: #d3ccd8; font-size: 14px; line-height: 1.45; }
     dialog form { margin-top: 18px; }
     @media (max-width: 420px) { .card, .app-shell { padding: 28px 20px; } .workspace-content, .access-content, .pin-content { padding: 22px 16px; } dialog { padding: 20px; } .pin-keypad { gap: 8px; } }
+  
+    /* Nexo · identidad cálida y privada */
+    :root { color-scheme: light; --ink:#292431; --muted:#716b78; --plum:#553b68; --plum-dark:#402b50; --lilac:#eee7f1; --line:#e3dce5; --paper:#fffdfb; --canvas:#f5f1eb; --green:#416a52; }
+    body { background:radial-gradient(ellipse at 12% 8%,rgba(229,218,235,.75),transparent 34%),radial-gradient(ellipse at 92% 92%,rgba(220,232,222,.62),transparent 32%),var(--canvas); color:var(--ink); font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; }
+    .app { padding:clamp(16px,4vw,40px); }
+    .card,.app-shell { max-width:680px; padding:clamp(24px,5vw,42px); border:1px solid rgba(91,69,103,.14); border-radius:28px; background:rgba(255,253,251,.95); box-shadow:0 22px 70px rgba(48,35,55,.10); }
+    .card { max-width:440px; }
+    .logo { background:linear-gradient(145deg,#674a78,#49345a); border:1px solid rgba(255,255,255,.35); color:#fff; box-shadow:0 8px 22px rgba(74,51,90,.2); }
+    h1,h2,h3 { color:var(--ink); }
+    .intro,.workspace-content p,.access-content p,.pin-content p,.settings-version,.access-summary { color:var(--muted); }
+    button { background:var(--plum); color:#fff; border-radius:13px; box-shadow:0 5px 14px rgba(75,51,90,.12); transition:background .18s ease,transform .18s ease,box-shadow .18s ease; }
+    button:hover { background:var(--plum-dark); box-shadow:0 8px 18px rgba(75,51,90,.18); }
+    button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible { outline:3px solid #b99ac9; outline-offset:2px; }
+    button.secondary { background:var(--lilac); color:var(--plum-dark); border:1px solid #ded1e4; box-shadow:none; }
+    button.secondary:hover { background:#e5d9eb; }
+    .connection-status { color:var(--muted); }
+    .connection-status::before { background:#4b8a61; }
+    .connection-status.is-offline::before { background:#c27b36; }
+    .app-header { margin-bottom:24px; }
+    .app-brand { color:var(--ink); }
+    .app-brand .logo { background:linear-gradient(145deg,#674a78,#49345a); }
+    .workspace-content,.access-content,.pin-content { border:1px solid var(--line); border-radius:20px; background:var(--paper); }
+    .workspace-content h1,.access-content h1,.pin-content h1 { color:var(--ink); }
+    .pin-dot { border-color:#9d91a3; }
+    .pin-dot.filled { background:var(--plum); border-color:var(--plum); }
+    .pin-error { color:#a53c4a; }
+    .pin-keypad button { background:var(--lilac); color:var(--plum-dark); border:1px solid #ded1e4; box-shadow:none; }
+    .pin-keypad button:hover { background:#e5d9eb; }
+    dialog { border:1px solid var(--line); border-radius:22px; background:var(--paper); color:var(--ink); box-shadow:0 24px 80px rgba(35,26,40,.22); }
+    dialog::backdrop { background:rgba(35,27,39,.42); backdrop-filter:blur(4px); }
+    .settings-section { border-color:var(--line); }
+    .update-list li { border:1px solid var(--line); background:#faf7f3; border-radius:14px; }
+    .update-list time { color:var(--muted); }
+    .update-list p { color:#514b57; }
+    #nexo-workspace,#nexo-cloud { width:100%; max-width:680px; color:var(--ink); }
+    #nexo-workspace h1,#nexo-workspace h2,#nexo-workspace h3,#nexo-cloud h1,#nexo-cloud h2,#nexo-cloud h3 { color:var(--ink); }
+    #nexo-workspace .nexo-card,#nexo-cloud .nc-card { border:1px solid var(--line); background:var(--paper); border-radius:18px; box-shadow:0 5px 18px rgba(48,35,55,.045); }
+    #nexo-workspace .nexo-muted,#nexo-cloud .nc-muted { color:var(--muted); }
+    #nexo-workspace .nexo-tag,#nexo-cloud .nc-tag { color:var(--plum); font-weight:700; letter-spacing:.06em; }
+    #nexo-workspace .nexo-form input,#nexo-workspace .nexo-form textarea,#nexo-workspace .nexo-form select,#nexo-cloud .nc-form input,#nexo-cloud .nc-form textarea,#nexo-cloud .nc-form select { border:1px solid #d8d0db; background:#fff; color:var(--ink); border-radius:12px; }
+    #nexo-workspace .nexo-row button,#nexo-workspace .nexo-tabs button,#nexo-workspace button.nexo-small,#nexo-cloud .nc-row button,#nexo-cloud button.nc-small { background:var(--lilac); color:var(--plum-dark); border:1px solid #ded1e4; border-radius:12px; box-shadow:none; }
+    #nexo-workspace .nexo-row button:hover,#nexo-workspace .nexo-tabs button:hover,#nexo-workspace button.nexo-small:hover,#nexo-cloud .nc-row button:hover,#nexo-cloud button.nc-small:hover { background:#e5d9eb; }
+    #nexo-workspace .nexo-alert,#nexo-cloud .nc-alert { background:#f8f0e3; color:#785725; border:1px solid #efdfc5; }
+    #nexo-cloud .nc-error { color:#a53c4a; }
+    #nexo-cloud .nc-success { color:var(--green); }
+    #nexo-cloud .nc-item,#nexo-workspace .nexo-item { border-color:var(--line); }
+    @media (max-width:520px) { .app { align-items:flex-start; padding:14px; } .card,.app-shell { border-radius:22px; padding:24px 18px; } #nexo-workspace,#nexo-cloud { padding:0; } .app-header { gap:10px; } }
+    @media (prefers-reduced-motion:reduce) { *,*::before,*::after { scroll-behavior:auto!important; transition:none!important; } }
   </style>
 </head>
 <body>
@@ -434,3 +482,4 @@
   </script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="./mvp.js?v=0.5.0"></script><script src="./cloud.js?v=0.6.0"></script></body>
 </html>
+
