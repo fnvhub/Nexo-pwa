@@ -1,4 +1,4 @@
-const CACHE_NAME = "nexo-v15";
+const CACHE_NAME = "nexo-v16";
 const CORE = [
   "./",
   "./index.html",

@@ -1,0 +1,11 @@
+NEXO v0.8.2
+
+Limpieza y corrección de caché y referencias de versión sobre la base estable de 0.8.1. Se mantiene la estructura DOM compatible con mvp.js/cloud.js y safety.js después de ambos módulos.
+
+Archivos para subir:
+- index.html (reemplazar)
+- sw.js (reemplazar)
+- safety.js (añadir)
+- supabase-safety-migration.sql (ejecutar en Supabase después del schema.sql si aún no se ejecutó)
+
+No reemplazar mvp.js ni cloud.js en esta entrega.

@@ -112,7 +112,7 @@
       render();
     }catch(e){
       root.hidden=false;
-      root.innerHTML=`<section class="ns-card"><h2>Seguridad y consentimiento</h2><p class="ns-alert">No se pudo cargar este módulo: ${esc(e.message||e)}</p><p class="ns-muted">La dinámica principal puede seguir funcionando. Si acabas de instalar esta versión, aplica primero el archivo de migración de Supabase incluido con Nexo 0.8.0.</p></section>`;
+      root.innerHTML=`<section class="ns-card"><h2>Seguridad y consentimiento</h2><p class="ns-alert">No se pudo cargar este módulo: ${esc(e.message||e)}</p><p class="ns-muted">La dinámica principal puede seguir funcionando. Si acabas de instalar esta versión, aplica primero el archivo de migración de Supabase incluido con Nexo 0.8.2.</p></section>`;
     }finally{loading=false}
   }
 

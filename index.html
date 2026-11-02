@@ -139,7 +139,7 @@
     <button id="configure-pin" class="secondary" type="button">Configurar PIN</button>
     <button id="remove-pin" class="secondary" type="button" hidden>Quitar PIN</button>
   </section>
-  <h3>Versión <span id="settings-version">0.8.1</span></h3>
+  <h3>Versión <span id="settings-version">0.8.2</span></h3>
   <h3>Últimas actualizaciones</h3>
   <ol id="update-history" class="update-list"></ol>
   <form method="dialog"><button class="secondary" type="submit">Cerrar</button></form>
@@ -149,12 +149,13 @@
 (() => {
   "use strict";
 
-  const APP_VERSION = "0.8.1";
+  const APP_VERSION = "0.8.2";
   const ACCESS_MODE_KEY = "nexo.accessMode";
   const PIN_SALT_KEY = "nexo.pinSalt";
   const PIN_HASH_KEY = "nexo.pinHash";
 
   const RELEASE_HISTORY = [
+    {version:"0.8.2",date:"2026-11-02",note:"Limpieza de caché y referencias de versión; se corrigen las referencias de módulos para evitar cargar recursos antiguos."},
     {version:"0.7.1",date:"2026-11-02",note:"Se corrige el acceso inicial para que Entrar funcione de forma independiente y se actualizan las referencias de caché de la PWA."},
     {version:"0.7.0",date:"2026-11-02",note:"Renovación visual, panel de progreso, tareas con estados y mejoras de identidad por espacio."},
     {version:"0.6.0",date:"2026-10-31",note:"Los envíos compartidos quedan pendientes de revisión DOM; las tareas se archivan para preservar su historial."},
@@ -163,8 +164,7 @@
     {version:"0.4.0",date:"2026-10-25",note:"PIN de acceso opcional y gestión desde Ajustes."},
     {version:"0.3.1",date:"2026-10-25",note:"Ajustes y versión dentro de la aplicación."},
     {version:"0.3.0",date:"2026-10-25",note:"Ajustes e historial de versiones."},
-    {version:"0.2.1",date:"2026-10-25",note:"Texto de portada simplificado."},
-    {version:"0.2.0",date:"2026-10-25",note:"Instalación PWA, estado de conexión y soporte sin conexión."}
+    {version:"0.2.1",date:"2026-10-25",note:"Texto de portada simplificado."}
   ];
 
   const $ = id => document.getElementById(id);
@@ -416,7 +416,7 @@
   });
 
   if("serviceWorker" in navigator){
-    navigator.serviceWorker.register("./sw.js?v=0.8.1").catch(err=>console.error("Nexo SW:",err));
+    navigator.serviceWorker.register("./sw.js?v=0.8.2").catch(err=>console.error("Nexo SW:",err));
   }
 
   // Primera pantalla siempre estable, incluso si otro módulo falla después.
@@ -425,8 +425,8 @@
 </script>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="./mvp.js?v=0.7.0"></script>
-<script src="./cloud.js?v=0.7.0"></script>
-<script src="./safety.js?v=0.8.1"></script>
+<script src="./mvp.js?v=0.8.2"></script>
+<script src="./cloud.js?v=0.8.2"></script>
+<script src="./safety.js?v=0.8.2"></script>
 </body>
 </html>

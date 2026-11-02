@@ -1,4 +1,4 @@
--- Nexo 0.8.0 — safety, consent, check-ins and aftercare
+-- Nexo 0.8.2 — safety, consent, check-ins and aftercare
 -- Run this AFTER the existing Nexo supabase/schema.sql.
 -- It is additive and does not remove existing data.
 
