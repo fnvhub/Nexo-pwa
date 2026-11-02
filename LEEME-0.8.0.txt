@@ -1,0 +1,15 @@
+NEXO 0.8.0 — ARCHIVOS DE ACTUALIZACIÓN
+
+Sube/sustituye en el repositorio:
+1. index.html
+2. sw.js
+3. safety.js
+
+Añade:
+4. supabase/safety-migration.sql
+
+IMPORTANTE:
+- NO borres mvp.js, cloud.js, manifest.webmanifest ni los iconos.
+- Ejecuta supabase/safety-migration.sql en Supabase DESPUÉS del schema.sql actual.
+- La migración es aditiva: crea el módulo de seguridad y check-ins sin borrar tareas, cuentas o dinámicas.
+- La app sigue funcionando localmente aunque Supabase no esté disponible.
