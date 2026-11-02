@@ -3,483 +3,429 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="theme-color" content="#f5f1eb">
+  <meta name="theme-color" content="#553b68">
   <meta name="description" content="Un espacio privado.">
-  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="manifest" href="./manifest.webmanifest">
   <link rel="icon" href="./icon.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" sizes="192x192" href="./icon-192.png">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-title" content="Nexo">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <title>Nexo</title>
   <style>
-    * { box-sizing: border-box; }
-    body { margin: 0; min-height: 100vh; background: #0d0b10; color: #f3eef5; font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
-    .app { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 24px; }
-    .card, .app-shell { width: 100%; max-width: 520px; padding: 36px 28px; border: 1px solid #302b35; border-radius: 24px; background: #151219; box-shadow: 0 20px 60px rgba(0,0,0,.35); }
-    .card { max-width: 420px; text-align: center; }
-    .logo { width: 72px; height: 72px; margin: 0 auto 22px; border-radius: 22px; display: flex; align-items: center; justify-content: center; background: #211c26; border: 1px solid #3a3340; font-size: 30px; font-weight: 700; }
-    h1 { margin: 0; font-size: 32px; letter-spacing: -.7px; }
-    .card h1 { font-size: 38px; letter-spacing: -1px; }
-    .intro { margin: 12px 0 30px; color: #aaa2ae; line-height: 1.5; }
-    button { width: 100%; min-height: 48px; border: 0; border-radius: 14px; padding: 13px 15px; background: #f0e8f2; color: #17131a; font-size: 16px; font-weight: 700; cursor: pointer; }
-    button:active { transform: scale(.98); }
-    button:focus-visible { outline: 3px solid #c6a7ff; outline-offset: 3px; }
-    button.secondary { margin-top: 12px; background: #29232f; color: #f3eef5; border: 1px solid #403847; }
-    button[hidden], section[hidden] { display: none; }
-    .connection-status { margin: 18px 0 0; font-size: 13px; color: #aaa2ae; }
-    .connection-status::before { content: ""; display: inline-block; width: 8px; height: 8px; margin-right: 8px; border-radius: 50%; background: #67c587; vertical-align: 1px; }
-    .connection-status.is-offline::before { background: #e4a654; }
-    .app-shell { max-width: 620px; }
-    .app-header { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 28px; }
-    .app-brand { display: flex; align-items: center; gap: 12px; font-size: 19px; font-weight: 700; }
-    .app-brand .logo { width: 42px; height: 42px; margin: 0; border-radius: 14px; font-size: 19px; }
-    .settings-button { width: auto; padding: 11px 16px; }
-    .workspace-content, .access-content, .pin-content { padding: 26px; border: 1px solid #302b35; border-radius: 18px; background: #201b25; }
-    .workspace-content { min-height: 220px; }
-    .workspace-content h1, .access-content h1, .pin-content h1 { font-size: 26px; letter-spacing: -.4px; }
-    .workspace-content p, .access-content p, .pin-content p { color: #aaa2ae; line-height: 1.55; }
-    .workspace-actions { margin-top: 28px; }
-    .access-content { text-align: center; }
-    .access-actions { margin-top: 24px; }
-    .pin-content { text-align: center; max-width: 420px; margin: 0 auto; }
-    .pin-dots { display: flex; justify-content: center; gap: 18px; margin: 24px 0 12px; }
-    .pin-dot { width: 14px; height: 14px; border: 2px solid #8b8191; border-radius: 50%; }
-    .pin-dot.filled { background: #f0e8f2; border-color: #f0e8f2; }
-    .pin-error { min-height: 22px; color: #f39c9c; font-size: 13px; }
-    .pin-keypad { display: grid; grid-template-columns: repeat(3, 76px); justify-content: center; gap: 10px; margin: 14px auto 0; }
-    .pin-keypad button { width: 76px; height: 58px; min-height: 58px; padding: 0; border-radius: 16px; background: #29232f; color: #f3eef5; border: 1px solid #403847; font-size: 22px; }
-    .pin-keypad button:hover { background: #393141; }
-    .pin-keypad .empty { visibility: hidden; }
-    .pin-cancel { margin-top: 16px; }
-    dialog { width: min(92vw, 460px); max-height: 82vh; overflow: auto; padding: 26px; border: 1px solid #403847; border-radius: 20px; background: #151219; color: #f3eef5; box-shadow: 0 20px 70px rgba(0,0,0,.55); }
-    dialog::backdrop { background: rgba(0,0,0,.72); }
-    dialog h2 { margin: 0 0 8px; }
-    dialog h3 { margin: 24px 0 12px; font-size: 15px; }
-    .settings-version, .access-summary { margin: 0; color: #aaa2ae; font-size: 14px; }
-    .settings-section { padding-bottom: 20px; border-bottom: 1px solid #302b35; }
-    .update-list { display: grid; gap: 10px; padding-left: 22px; }
-    .update-list li { padding: 12px; border: 1px solid #302b35; border-radius: 12px; background: #201b25; }
-    .update-list strong { display: block; margin-bottom: 4px; }
-    .update-list time { color: #aaa2ae; font-size: 12px; }
-    .update-list p { margin: 8px 0 0; color: #d3ccd8; font-size: 14px; line-height: 1.45; }
-    dialog form { margin-top: 18px; }
-    @media (max-width: 420px) { .card, .app-shell { padding: 28px 20px; } .workspace-content, .access-content, .pin-content { padding: 22px 16px; } dialog { padding: 20px; } .pin-keypad { gap: 8px; } }
-  
-    /* Nexo · identidad cálida y privada */
-    :root { color-scheme: light; --ink:#292431; --muted:#716b78; --plum:#553b68; --plum-dark:#402b50; --lilac:#eee7f1; --line:#e3dce5; --paper:#fffdfb; --canvas:#f5f1eb; --green:#416a52; }
-    body { background:radial-gradient(ellipse at 12% 8%,rgba(229,218,235,.75),transparent 34%),radial-gradient(ellipse at 92% 92%,rgba(220,232,222,.62),transparent 32%),var(--canvas); color:var(--ink); font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; }
-    .app { padding:clamp(16px,4vw,40px); }
-    .card,.app-shell { max-width:680px; padding:clamp(24px,5vw,42px); border:1px solid rgba(91,69,103,.14); border-radius:28px; background:rgba(255,253,251,.95); box-shadow:0 22px 70px rgba(48,35,55,.10); }
-    .card { max-width:440px; }
-    .logo { background:linear-gradient(145deg,#674a78,#49345a); border:1px solid rgba(255,255,255,.35); color:#fff; box-shadow:0 8px 22px rgba(74,51,90,.2); }
-    h1,h2,h3 { color:var(--ink); }
-    .intro,.workspace-content p,.access-content p,.pin-content p,.settings-version,.access-summary { color:var(--muted); }
-    button { background:var(--plum); color:#fff; border-radius:13px; box-shadow:0 5px 14px rgba(75,51,90,.12); transition:background .18s ease,transform .18s ease,box-shadow .18s ease; }
-    button:hover { background:var(--plum-dark); box-shadow:0 8px 18px rgba(75,51,90,.18); }
-    button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible { outline:3px solid #b99ac9; outline-offset:2px; }
-    button.secondary { background:var(--lilac); color:var(--plum-dark); border:1px solid #ded1e4; box-shadow:none; }
-    button.secondary:hover { background:#e5d9eb; }
-    .connection-status { color:var(--muted); }
-    .connection-status::before { background:#4b8a61; }
-    .connection-status.is-offline::before { background:#c27b36; }
-    .app-header { margin-bottom:24px; }
-    .app-brand { color:var(--ink); }
-    .app-brand .logo { background:linear-gradient(145deg,#674a78,#49345a); }
-    .workspace-content,.access-content,.pin-content { border:1px solid var(--line); border-radius:20px; background:var(--paper); }
-    .workspace-content h1,.access-content h1,.pin-content h1 { color:var(--ink); }
-    .pin-dot { border-color:#9d91a3; }
-    .pin-dot.filled { background:var(--plum); border-color:var(--plum); }
-    .pin-error { color:#a53c4a; }
-    .pin-keypad button { background:var(--lilac); color:var(--plum-dark); border:1px solid #ded1e4; box-shadow:none; }
-    .pin-keypad button:hover { background:#e5d9eb; }
-    dialog { border:1px solid var(--line); border-radius:22px; background:var(--paper); color:var(--ink); box-shadow:0 24px 80px rgba(35,26,40,.22); }
-    dialog::backdrop { background:rgba(35,27,39,.42); backdrop-filter:blur(4px); }
-    .settings-section { border-color:var(--line); }
-    .update-list li { border:1px solid var(--line); background:#faf7f3; border-radius:14px; }
-    .update-list time { color:var(--muted); }
-    .update-list p { color:#514b57; }
-    #nexo-workspace,#nexo-cloud { width:100%; max-width:680px; color:var(--ink); }
-    #nexo-workspace h1,#nexo-workspace h2,#nexo-workspace h3,#nexo-cloud h1,#nexo-cloud h2,#nexo-cloud h3 { color:var(--ink); }
-    #nexo-workspace .nexo-card,#nexo-cloud .nc-card { border:1px solid var(--line); background:var(--paper); border-radius:18px; box-shadow:0 5px 18px rgba(48,35,55,.045); }
-    #nexo-workspace .nexo-muted,#nexo-cloud .nc-muted { color:var(--muted); }
-    #nexo-workspace .nexo-tag,#nexo-cloud .nc-tag { color:var(--plum); font-weight:700; letter-spacing:.06em; }
-    #nexo-workspace .nexo-form input,#nexo-workspace .nexo-form textarea,#nexo-workspace .nexo-form select,#nexo-cloud .nc-form input,#nexo-cloud .nc-form textarea,#nexo-cloud .nc-form select { border:1px solid #d8d0db; background:#fff; color:var(--ink); border-radius:12px; }
-    #nexo-workspace .nexo-row button,#nexo-workspace .nexo-tabs button,#nexo-workspace button.nexo-small,#nexo-cloud .nc-row button,#nexo-cloud button.nc-small { background:var(--lilac); color:var(--plum-dark); border:1px solid #ded1e4; border-radius:12px; box-shadow:none; }
-    #nexo-workspace .nexo-row button:hover,#nexo-workspace .nexo-tabs button:hover,#nexo-workspace button.nexo-small:hover,#nexo-cloud .nc-row button:hover,#nexo-cloud button.nc-small:hover { background:#e5d9eb; }
-    #nexo-workspace .nexo-alert,#nexo-cloud .nc-alert { background:#f8f0e3; color:#785725; border:1px solid #efdfc5; }
-    #nexo-cloud .nc-error { color:#a53c4a; }
-    #nexo-cloud .nc-success { color:var(--green); }
-    #nexo-cloud .nc-item,#nexo-workspace .nexo-item { border-color:var(--line); }
-    @media (max-width:520px) { .app { align-items:flex-start; padding:14px; } .card,.app-shell { border-radius:22px; padding:24px 18px; } #nexo-workspace,#nexo-cloud { padding:0; } .app-header { gap:10px; } }
-    @media (prefers-reduced-motion:reduce) { *,*::before,*::after { scroll-behavior:auto!important; transition:none!important; } }
+    *{box-sizing:border-box}
+    :root{color-scheme:light;--ink:#292431;--muted:#716b78;--plum:#553b68;--plum-dark:#402b50;--lilac:#eee7f1;--line:#e3dce5;--paper:#fffdfb;--canvas:#f5f1eb;--green:#416a52;--red:#a53c4a}
+    body{margin:0;min-height:100vh;background:radial-gradient(ellipse at 12% 8%,rgba(229,218,235,.75),transparent 34%),radial-gradient(ellipse at 92% 92%,rgba(220,232,222,.62),transparent 32%),var(--canvas);color:var(--ink);font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+    .app{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:clamp(14px,4vw,40px)}
+    .card,.app-shell{width:100%;max-width:680px;padding:clamp(24px,5vw,42px);border:1px solid rgba(91,69,103,.14);border-radius:28px;background:rgba(255,253,251,.96);box-shadow:0 22px 70px rgba(48,35,55,.10)}
+    .card{max-width:440px;text-align:center}
+    .logo{width:72px;height:72px;margin:0 auto 22px;border-radius:22px;display:flex;align-items:center;justify-content:center;background:linear-gradient(145deg,#674a78,#49345a);border:1px solid rgba(255,255,255,.35);color:#fff;box-shadow:0 8px 22px rgba(74,51,90,.2);font-size:30px;font-weight:700}
+    h1,h2,h3{color:var(--ink)}
+    h1{margin:0;font-size:32px;letter-spacing:-.7px}
+    .card h1{font-size:38px;letter-spacing:-1px}
+    .intro,.workspace-content p,.access-content p,.pin-content p,.settings-version,.access-summary{color:var(--muted);line-height:1.5}
+    .intro{margin:12px 0 30px}
+    button{width:100%;min-height:48px;border:0;border-radius:13px;padding:13px 15px;background:var(--plum);color:#fff;font-size:16px;font-weight:700;cursor:pointer;box-shadow:0 5px 14px rgba(75,51,90,.12);transition:.18s ease}
+    button:hover{background:var(--plum-dark);box-shadow:0 8px 18px rgba(75,51,90,.18)}
+    button:active{transform:scale(.98)}
+    button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible{outline:3px solid #b99ac9;outline-offset:2px}
+    button.secondary{margin-top:12px;background:var(--lilac);color:var(--plum-dark);border:1px solid #ded1e4;box-shadow:none}
+    button.secondary:hover{background:#e5d9eb}
+    button[hidden],section[hidden]{display:none!important}
+    .connection-status{margin:18px 0 0;font-size:13px;color:var(--muted)}
+    .connection-status:before{content:"";display:inline-block;width:8px;height:8px;margin-right:8px;border-radius:50%;background:#4b8a61;vertical-align:1px}
+    .connection-status.is-offline:before{background:#c27b36}
+    .app-header{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:24px}
+    .app-brand{display:flex;align-items:center;gap:12px;font-size:19px;font-weight:700;color:var(--ink)}
+    .app-brand .logo{width:42px;height:42px;margin:0;border-radius:14px;font-size:19px}
+    .settings-button{width:auto;padding:11px 16px}
+    .workspace-content,.access-content,.pin-content{padding:26px;border:1px solid var(--line);border-radius:20px;background:var(--paper)}
+    .workspace-content{min-height:220px}
+    .workspace-content h1,.access-content h1,.pin-content h1{font-size:26px;letter-spacing:-.4px}
+    .access-content,.pin-content{text-align:center}
+    .workspace-actions,.access-actions{margin-top:24px}
+    .pin-content{max-width:420px;margin:0 auto}
+    .pin-dots{display:flex;justify-content:center;gap:18px;margin:24px 0 12px}
+    .pin-dot{width:14px;height:14px;border:2px solid #9d91a3;border-radius:50%}
+    .pin-dot.filled{background:var(--plum);border-color:var(--plum)}
+    .pin-error{min-height:22px;color:var(--red);font-size:13px}
+    .pin-keypad{display:grid;grid-template-columns:repeat(3,76px);justify-content:center;gap:10px;margin:14px auto 0}
+    .pin-keypad button{width:76px;height:58px;min-height:58px;padding:0;border-radius:16px;background:var(--lilac);color:var(--plum-dark);border:1px solid #ded1e4;box-shadow:none;font-size:22px}
+    .pin-keypad button:hover{background:#e5d9eb}
+    .pin-keypad .empty{visibility:hidden}
+    .pin-cancel{margin-top:16px}
+    dialog{width:min(92vw,460px);max-height:82vh;overflow:auto;padding:26px;border:1px solid var(--line);border-radius:22px;background:var(--paper);color:var(--ink);box-shadow:0 24px 80px rgba(35,26,40,.22)}
+    dialog::backdrop{background:rgba(35,27,39,.42);backdrop-filter:blur(4px)}
+    dialog h2{margin:0 0 8px}
+    dialog h3{margin:24px 0 12px;font-size:15px}
+    .settings-section{padding-bottom:20px;border-bottom:1px solid var(--line)}
+    .update-list{display:grid;gap:10px;padding-left:22px}
+    .update-list li{padding:12px;border:1px solid var(--line);border-radius:14px;background:#faf7f3}
+    .update-list strong{display:block;margin-bottom:4px}
+    .update-list time{color:var(--muted);font-size:12px}
+    .update-list p{margin:8px 0 0;color:#514b57;font-size:14px;line-height:1.45}
+    #nexo-workspace,#nexo-cloud{width:100%;max-width:680px}
+    @media(max-width:520px){
+      .app{align-items:flex-start}
+      .card,.app-shell{border-radius:22px;padding:24px 18px}
+      .workspace-content,.access-content,.pin-content{padding:22px 16px}
+      .app-header{gap:10px}
+      .pin-keypad{gap:8px}
+      dialog{padding:20px}
+    }
   </style>
 </head>
 <body>
-  <main class="app">
-    <section id="welcome-screen" class="card" aria-labelledby="app-title">
-      <div class="logo" aria-hidden="true">N</div>
-      <h1 id="app-title">Nexo</h1>
-      <p class="intro">Un espacio privado.</p>
-      <button id="enter-button" type="button">Entrar</button>
-      <button id="install-button" class="secondary" type="button" hidden>Instalar Nexo</button>
-      <p id="connection-status" class="connection-status" role="status" aria-live="polite"></p>
-    </section>
+<main class="app">
+  <section id="welcome-screen" class="card" aria-labelledby="app-title">
+    <div class="logo" aria-hidden="true">N</div>
+    <h1 id="app-title">Nexo</h1>
+    <p class="intro">Un espacio privado.</p>
+    <button id="enter-button" type="button">Entrar</button>
+    <button id="install-button" class="secondary" type="button" hidden>Instalar Nexo</button>
+    <p id="connection-status" class="connection-status" role="status" aria-live="polite"></p>
+  </section>
 
-    <section id="access-choice" class="app-shell" aria-labelledby="access-title" hidden>
-      <div class="app-header"><div class="app-brand"><span class="logo" aria-hidden="true">N</span><span>Nexo</span></div></div>
-      <div class="access-content">
-        <h1 id="access-title">Elige cómo quieres acceder</h1>
-        <p>Puedes pedir un PIN de cuatro números cada vez que abras Nexo o entrar sin PIN.</p>
-        <div class="access-actions">
-          <button id="choose-pin" type="button">Usar PIN</button>
-          <button id="choose-no-pin" class="secondary" type="button">Continuar sin PIN</button>
-          <button id="access-back" class="secondary" type="button">Volver</button>
-        </div>
+  <section id="access-choice" class="app-shell" aria-labelledby="access-title" hidden>
+    <div class="app-header"><div class="app-brand"><span class="logo" aria-hidden="true">N</span><span>Nexo</span></div></div>
+    <div class="access-content">
+      <h1 id="access-title">Elige cómo quieres acceder</h1>
+      <p>Puedes proteger Nexo con un PIN de cuatro números o entrar sin PIN.</p>
+      <div class="access-actions">
+        <button id="choose-pin" type="button">Usar PIN</button>
+        <button id="choose-no-pin" class="secondary" type="button">Continuar sin PIN</button>
+        <button id="access-back" class="secondary" type="button">Volver</button>
       </div>
-    </section>
+    </div>
+  </section>
 
-    <section id="pin-screen" class="app-shell" aria-labelledby="pin-title" hidden>
-      <div class="app-header"><div class="app-brand"><span class="logo" aria-hidden="true">N</span><span>Nexo</span></div></div>
-      <div class="pin-content">
-        <h1 id="pin-title">Introduce tu PIN</h1>
-        <p id="pin-description">Usa el teclado numérico para continuar.</p>
-        <div id="pin-dots" class="pin-dots" role="img" aria-label="0 de 4 dígitos introducidos"></div>
-        <div id="pin-error" class="pin-error" role="status" aria-live="polite"></div>
-        <div class="pin-keypad" aria-label="Teclado numérico">
-          <button type="button" data-digit="1" aria-label="1">1</button>
-          <button type="button" data-digit="2" aria-label="2">2</button>
-          <button type="button" data-digit="3" aria-label="3">3</button>
-          <button type="button" data-digit="4" aria-label="4">4</button>
-          <button type="button" data-digit="5" aria-label="5">5</button>
-          <button type="button" data-digit="6" aria-label="6">6</button>
-          <button type="button" data-digit="7" aria-label="7">7</button>
-          <button type="button" data-digit="8" aria-label="8">8</button>
-          <button type="button" data-digit="9" aria-label="9">9</button>
-          <span class="empty" aria-hidden="true"></span>
-          <button type="button" data-digit="0" aria-label="0">0</button>
-          <button id="pin-delete" type="button" aria-label="Borrar último dígito">⌫</button>
-        </div>
-        <button id="pin-cancel" class="secondary pin-cancel" type="button">Cancelar</button>
+  <section id="pin-screen" class="app-shell" aria-labelledby="pin-title" hidden>
+    <div class="app-header"><div class="app-brand"><span class="logo" aria-hidden="true">N</span><span>Nexo</span></div></div>
+    <div class="pin-content">
+      <h1 id="pin-title">Introduce tu PIN</h1>
+      <p id="pin-description">Usa el teclado numérico para continuar.</p>
+      <div id="pin-dots" class="pin-dots" role="img" aria-label="0 de 4 dígitos introducidos"></div>
+      <div id="pin-error" class="pin-error" role="status" aria-live="polite"></div>
+      <div class="pin-keypad" aria-label="Teclado numérico">
+        <button type="button" data-digit="1">1</button><button type="button" data-digit="2">2</button><button type="button" data-digit="3">3</button>
+        <button type="button" data-digit="4">4</button><button type="button" data-digit="5">5</button><button type="button" data-digit="6">6</button>
+        <button type="button" data-digit="7">7</button><button type="button" data-digit="8">8</button><button type="button" data-digit="9">9</button>
+        <span class="empty"></span><button type="button" data-digit="0">0</button><button id="pin-delete" type="button">⌫</button>
       </div>
+      <button id="pin-cancel" class="secondary pin-cancel" type="button">Cancelar</button>
+    </div>
+  </section>
+
+  <section id="app-screen" class="app-shell" aria-labelledby="workspace-title" hidden>
+    <header class="app-header">
+      <div class="app-brand"><span class="logo" aria-hidden="true">N</span><span>Nexo</span></div>
+      <button id="settings-button" class="secondary settings-button" type="button">Ajustes</button>
+    </header>
+    <section class="workspace-content">
+      <h1 id="workspace-title">Tu espacio privado</h1>
+      <p>Has entrado en Nexo. Este espacio será el punto de encuentro de la aplicación.</p>
+      <div class="workspace-actions"><button id="leave-button" class="secondary" type="button">Volver a la portada</button></div>
     </section>
+    <p id="app-connection-status" class="connection-status" role="status" aria-live="polite"></p>
+  </section>
+</main>
 
-    <section id="app-screen" class="app-shell" aria-labelledby="workspace-title" hidden>
-      <header class="app-header">
-        <div class="app-brand"><span class="logo" aria-hidden="true">N</span><span>Nexo</span></div>
-        <button id="settings-button" class="secondary settings-button" type="button">Ajustes</button>
-      </header>
-      <section class="workspace-content">
-        <h1 id="workspace-title">Tu espacio privado</h1>
-        <p>Has entrado en Nexo. Este espacio será el punto de encuentro de la aplicación.</p>
-        <div class="workspace-actions"><button id="leave-button" class="secondary" type="button">Volver a la portada</button></div>
-      </section>
-      <p id="app-connection-status" class="connection-status" role="status" aria-live="polite"></p>
-    </section>
-  </main>
+<dialog id="settings-dialog" aria-labelledby="settings-title">
+  <h2 id="settings-title">Ajustes</h2>
+  <p id="settings-message" role="status" aria-live="polite"></p>
+  <section class="settings-section">
+    <h3>Acceso</h3>
+    <p id="access-summary" class="access-summary"></p>
+    <button id="configure-pin" class="secondary" type="button">Configurar PIN</button>
+    <button id="remove-pin" class="secondary" type="button" hidden>Quitar PIN</button>
+  </section>
+  <h3>Versión <span id="settings-version">0.7.1</span></h3>
+  <h3>Últimas actualizaciones</h3>
+  <ol id="update-history" class="update-list"></ol>
+  <form method="dialog"><button class="secondary" type="submit">Cerrar</button></form>
+</dialog>
 
-  <dialog id="settings-dialog" aria-labelledby="settings-title">
-    <h2 id="settings-title">Ajustes</h2><p id="settings-message" class="settings-message" role="status" aria-live="polite"></p>
-    <section class="settings-section">
-      <h3>Acceso</h3>
-      <p id="access-summary" class="access-summary"></p>
-      <button id="configure-pin" class="secondary" type="button">Configurar PIN</button>
-      <button id="remove-pin" class="secondary" type="button" hidden>Quitar PIN</button>
-    </section>
-    <h3>Versión <span id="settings-version"></span></h3>
-    <h3>Últimas actualizaciones</h3>
-    <ol id="update-history" class="update-list"></ol>
-    <form method="dialog"><button class="secondary" type="submit">Cerrar</button></form>
-  </dialog>
+<script>
+(() => {
+  "use strict";
 
-  <script>
-    const APP_VERSION = "0.6.0";
-    const ACCESS_MODE_KEY = "nexo.accessMode";
-    const PIN_SALT_KEY = "nexo.pinSalt";
-    const PIN_HASH_KEY = "nexo.pinHash";
-    const RELEASE_HISTORY = [
-      { version: "0.6.0", date: "2026-10-31", note: "Los envíos compartidos quedan pendientes de revisión DOM; las tareas se archivan para preservar su historial." },
-      { version: "0.5.1", date: "2026-10-25", note: "El texto de invitación incluye la URL y clave publicable para que la SUM configure su dispositivo; la app bloquea claves secretas service_role/sb_secret_." },
-      { version: "0.5.0", date: "2026-10-25", note: "Edición y borrado de tareas; acceso por cuenta, invitaciones de un solo uso por dinámica y perfil compartido mediante Supabase; el mensaje de invitación incluye instalación de la PWA." },
-      { version: "0.4.0", date: "2026-10-25", note: "PIN de acceso opcional, teclado oculto y gestión desde Ajustes." },
-      { version: "0.3.1", date: "2026-10-25", note: "Ajustes y versión se muestran dentro de la aplicación." },
-      { version: "0.3.0", date: "2026-10-25", note: "Se añadieron ajustes e historial de versiones." },
-      { version: "0.2.1", date: "2026-10-25", note: "Se simplificó el texto de portada." },
-      { version: "0.2.0", date: "2026-10-25", note: "Instalación PWA, estado de conexión y soporte sin conexión." },
-      { version: "0.1.0", date: "2026-10-25", note: "Primera versión de la portada de Nexo." }
-    ].slice(0, 10);
+  const APP_VERSION = "0.7.1";
+  const ACCESS_MODE_KEY = "nexo.accessMode";
+  const PIN_SALT_KEY = "nexo.pinSalt";
+  const PIN_HASH_KEY = "nexo.pinHash";
 
-    let installPrompt = null;
-    let pinBuffer = "";
-    let pendingPin = "";
-    let pinAction = "";
-    let pinStage = "";
-    let pinOrigin = "";
-    const welcomeScreen = document.getElementById("welcome-screen");
-    const accessChoice = document.getElementById("access-choice");
-    const pinScreen = document.getElementById("pin-screen");
-    const appScreen = document.getElementById("app-screen");
-    const enterButton = document.getElementById("enter-button");
-    const installButton = document.getElementById("install-button");
-    const settingsButton = document.getElementById("settings-button");
-    const settingsDialog = document.getElementById("settings-dialog");
-    const isAppleMobile = /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
-    const isInstalled = window.matchMedia("(display-mode: standalone)").matches || navigator.standalone === true;
+  const RELEASE_HISTORY = [
+    {version:"0.7.1",date:"2026-11-02",note:"Se corrige el acceso inicial para que Entrar funcione de forma independiente y se actualizan las referencias de caché de la PWA."},
+    {version:"0.7.0",date:"2026-11-02",note:"Renovación visual, panel de progreso, tareas con estados y mejoras de identidad por espacio."},
+    {version:"0.6.0",date:"2026-10-31",note:"Los envíos compartidos quedan pendientes de revisión DOM; las tareas se archivan para preservar su historial."},
+    {version:"0.5.1",date:"2026-10-25",note:"La invitación incluye la URL y clave publicable para configurar el dispositivo; se bloquean claves secretas."},
+    {version:"0.5.0",date:"2026-10-25",note:"Edición y borrado de tareas; acceso por cuenta, invitaciones y perfil compartido mediante Supabase."},
+    {version:"0.4.0",date:"2026-10-25",note:"PIN de acceso opcional y gestión desde Ajustes."},
+    {version:"0.3.1",date:"2026-10-25",note:"Ajustes y versión dentro de la aplicación."},
+    {version:"0.3.0",date:"2026-10-25",note:"Ajustes e historial de versiones."},
+    {version:"0.2.1",date:"2026-10-25",note:"Texto de portada simplificado."},
+    {version:"0.2.0",date:"2026-10-25",note:"Instalación PWA, estado de conexión y soporte sin conexión."}
+  ];
 
-    function showScreen(screen) {
-      welcomeScreen.hidden = screen !== "welcome";
-      accessChoice.hidden = screen !== "choice";
-      pinScreen.hidden = screen !== "pin";
-      appScreen.hidden = screen !== "app";
-      window.scrollTo(0, 0);
+  const $ = id => document.getElementById(id);
+  const welcome = $("welcome-screen");
+  const choice = $("access-choice");
+  const pin = $("pin-screen");
+  const app = $("app-screen");
+  const enter = $("enter-button");
+  const install = $("install-button");
+  const settings = $("settings-dialog");
+
+  let pinBuffer = "";
+  let pendingPin = "";
+  let pinStage = "";
+  let pinOrigin = "";
+  let installPrompt = null;
+
+  function showScreen(name) {
+    welcome.hidden = name !== "welcome";
+    choice.hidden = name !== "choice";
+    pin.hidden = name !== "pin";
+    app.hidden = name !== "app";
+    window.scrollTo(0,0);
+  }
+
+  // Expuesto para que mvp.js/cloud.js puedan reutilizar la navegación si lo necesitan.
+  window.nexoShowScreen = showScreen;
+
+  function connection() {
+    const text = navigator.onLine ? "Con conexión" : "Sin conexión";
+    ["connection-status","app-connection-status"].forEach(id => {
+      const el = $(id);
+      if (!el) return;
+      el.textContent = text;
+      el.classList.toggle("is-offline", !navigator.onLine);
+    });
+  }
+
+  function dots() {
+    const box = $("pin-dots");
+    box.replaceChildren();
+    for (let i=0;i<4;i++) {
+      const d=document.createElement("span");
+      d.className="pin-dot"+(i<pinBuffer.length?" filled":"");
+      d.setAttribute("aria-hidden","true");
+      box.append(d);
     }
+    box.setAttribute("aria-label",`${pinBuffer.length} de 4 dígitos introducidos`);
+  }
 
-    function updateConnectionStatus() {
-      const text = navigator.onLine ? "Con conexión" : "Sin conexión";
-      ["connection-status", "app-connection-status"].forEach((id) => {
-        const element = document.getElementById(id);
-        element.textContent = text;
-        element.classList.toggle("is-offline", !navigator.onLine);
-      });
-    }
+  function stage(name,message="") {
+    pinStage=name;
+    pinBuffer="";
+    $("pin-error").textContent=message;
+    const labels={
+      login:["Introduce tu PIN","Usa el teclado numérico para continuar."],
+      setupFirst:["Crea tu PIN","Elige cuatro números. No se mostrarán en pantalla."],
+      setupConfirm:["Confirma tu PIN","Vuelve a introducir los cuatro números."],
+      changeCurrent:["PIN actual","Confirma tu PIN actual para cambiarlo."],
+      changeFirst:["Nuevo PIN","Elige cuatro números para tu nuevo PIN."],
+      changeConfirm:["Confirma el nuevo PIN","Vuelve a introducir los cuatro números."],
+      removeCurrent:["Confirma tu PIN","Introduce tu PIN actual para quitarlo."]
+    };
+    $("pin-title").textContent=labels[name][0];
+    $("pin-description").textContent=labels[name][1];
+    dots();
+  }
 
-    function renderPinDots() {
-      const dots = document.getElementById("pin-dots");
-      dots.replaceChildren();
-      for (let i = 0; i < 4; i += 1) {
-        const dot = document.createElement("span");
-        dot.className = i < pinBuffer.length ? "pin-dot filled" : "pin-dot";
-        dot.setAttribute("aria-hidden", "true");
-        dots.append(dot);
+  function startPin(action,origin) {
+    pinOrigin=origin;
+    const first={login:"login",setup:"setupFirst",change:"changeCurrent",remove:"removeCurrent"}[action];
+    stage(first);
+    showScreen("pin");
+  }
+
+  function beginEntry() {
+    const mode=localStorage.getItem(ACCESS_MODE_KEY);
+    if (mode==="none") return showScreen("app");
+    if (mode==="pin" && localStorage.getItem(PIN_HASH_KEY) && localStorage.getItem(PIN_SALT_KEY)) return startPin("login","entry");
+    showScreen("choice");
+  }
+
+  function bytesToHex(bytes) {
+    return Array.from(bytes,b=>b.toString(16).padStart(2,"0")).join("");
+  }
+  function hexToBytes(hex) {
+    const bytes=new Uint8Array(hex.length/2);
+    for(let i=0;i<bytes.length;i++) bytes[i]=parseInt(hex.slice(i*2,i*2+2),16);
+    return bytes;
+  }
+  async function hashPin(value,saltHex) {
+    const material=await crypto.subtle.importKey("raw",new TextEncoder().encode(value),"PBKDF2",false,["deriveBits"]);
+    const bits=await crypto.subtle.deriveBits({name:"PBKDF2",salt:hexToBytes(saltHex),iterations:120000,hash:"SHA-256"},material,256);
+    return bytesToHex(new Uint8Array(bits));
+  }
+  async function savePin(value) {
+    const salt=new Uint8Array(16);
+    crypto.getRandomValues(salt);
+    const saltHex=bytesToHex(salt);
+    localStorage.setItem(PIN_SALT_KEY,saltHex);
+    localStorage.setItem(PIN_HASH_KEY,await hashPin(value,saltHex));
+    localStorage.setItem(ACCESS_MODE_KEY,"pin");
+  }
+  async function verifyPin(value) {
+    const salt=localStorage.getItem(PIN_SALT_KEY);
+    const saved=localStorage.getItem(PIN_HASH_KEY);
+    return !!salt && !!saved && (await hashPin(value,salt))===saved;
+  }
+
+  async function processPin() {
+    if(pinBuffer.length!==4) return;
+    const value=pinBuffer;
+    pinBuffer="";
+    dots();
+
+    try {
+      if(pinStage==="login") {
+        if(await verifyPin(value)) showScreen("app");
+        else stage("login","PIN incorrecto. Inténtalo de nuevo.");
+        return;
       }
-      dots.setAttribute("aria-label", pinBuffer.length + " de 4 dígitos introducidos");
-    }
-
-    function setPinStage(stage, message) {
-      pinStage = stage;
-      pinBuffer = "";
-      document.getElementById("pin-error").textContent = message || "";
-      const title = document.getElementById("pin-title");
-      const description = document.getElementById("pin-description");
-      const labels = {
-        login: ["Introduce tu PIN", "Usa el teclado numérico para continuar."],
-        setupFirst: ["Crea tu PIN", "Elige cuatro números. No se mostrarán en pantalla."],
-        setupConfirm: ["Confirma tu PIN", "Vuelve a introducir los cuatro números."],
-        changeCurrent: ["PIN actual", "Confirma tu PIN actual para cambiarlo."],
-        changeFirst: ["Nuevo PIN", "Elige cuatro números para tu nuevo PIN."],
-        changeConfirm: ["Confirma el nuevo PIN", "Vuelve a introducir los cuatro números."],
-        removeCurrent: ["Confirma tu PIN", "Introduce tu PIN actual para quitarlo."]
-      };
-      title.textContent = labels[stage][0];
-      description.textContent = labels[stage][1];
-      renderPinDots();
-    }
-
-    function startPinFlow(action, origin) {
-      pinAction = action;
-      pinOrigin = origin;
-      const firstStage = { login: "login", setup: "setupFirst", change: "changeCurrent", remove: "removeCurrent" }[action];
-      setPinStage(firstStage);
-      showScreen("pin");
-    }
-
-    function enterApp() {
-      showScreen("app");
-    }
-
-    function beginEntry() {
-      const mode = localStorage.getItem(ACCESS_MODE_KEY);
-      if (mode === "pin") {
-        if (localStorage.getItem(PIN_HASH_KEY) && localStorage.getItem(PIN_SALT_KEY)) {
-          startPinFlow("login", "entry");
-        } else {
-          showScreen("choice");
-        }
-      } else if (mode === "none") {
-        enterApp();
-      } else {
-        showScreen("choice");
+      if(pinStage==="setupFirst" || pinStage==="changeFirst") {
+        pendingPin=value;
+        stage(pinStage==="setupFirst"?"setupConfirm":"changeConfirm");
+        return;
       }
-    }
-
-    function bytesToHex(bytes) {
-      return Array.from(bytes, (byte) => byte.toString(16).padStart(2, "0")).join("");
-    }
-
-    function hexToBytes(hex) {
-      const bytes = new Uint8Array(hex.length / 2);
-      for (let i = 0; i < bytes.length; i += 1) bytes[i] = parseInt(hex.slice(i * 2, i * 2 + 2), 16);
-      return bytes;
-    }
-
-    async function hashPin(pin, saltHex) {
-      const material = await crypto.subtle.importKey("raw", new TextEncoder().encode(pin), "PBKDF2", false, ["deriveBits"]);
-      const bits = await crypto.subtle.deriveBits({ name: "PBKDF2", salt: hexToBytes(saltHex), iterations: 120000, hash: "SHA-256" }, material, 256);
-      return bytesToHex(new Uint8Array(bits));
-    }
-
-    async function savePin(pin) {
-      const salt = new Uint8Array(16);
-      crypto.getRandomValues(salt);
-      const saltHex = bytesToHex(salt);
-      const hash = await hashPin(pin, saltHex);
-      localStorage.setItem(PIN_SALT_KEY, saltHex);
-      localStorage.setItem(PIN_HASH_KEY, hash);
-      localStorage.setItem(ACCESS_MODE_KEY, "pin");
-    }
-
-    async function verifyPin(pin) {
-      const salt = localStorage.getItem(PIN_SALT_KEY);
-      const savedHash = localStorage.getItem(PIN_HASH_KEY);
-      if (!salt || !savedHash) return false;
-      return (await hashPin(pin, salt)) === savedHash;
-    }
-
-    function finishPinChange() {
-      pendingPin = "";
-      enterApp();
-      openSettings("PIN actualizado.");
-    }
-
-    async function processPin() {
-      if (pinBuffer.length !== 4) return;
-      const enteredPin = pinBuffer;
-      pinBuffer = "";
-      renderPinDots();
-      try {
-        if (pinStage === "login") {
-          if (await verifyPin(enteredPin)) enterApp();
-          else setPinStage("login", "PIN incorrecto. Inténtalo de nuevo.");
+      if(pinStage==="setupConfirm" || pinStage==="changeConfirm") {
+        if(value!==pendingPin) {
+          pendingPin="";
+          stage(pinStage==="setupConfirm"?"setupFirst":"changeFirst","Los PIN no coinciden. Elige uno nuevo.");
           return;
         }
-        if (pinStage === "setupFirst" || pinStage === "changeFirst") {
-          pendingPin = enteredPin;
-          setPinStage(pinStage === "setupFirst" ? "setupConfirm" : "changeConfirm");
+        await savePin(value);
+        pendingPin="";
+        showScreen("app");
+        if(pinOrigin==="settings") openSettings("PIN actualizado.");
+        return;
+      }
+      if(pinStage==="changeCurrent" || pinStage==="removeCurrent") {
+        if(!(await verifyPin(value))) {
+          stage(pinStage,"PIN incorrecto. Inténtalo de nuevo.");
           return;
         }
-        if (pinStage === "setupConfirm" || pinStage === "changeConfirm") {
-          if (enteredPin !== pendingPin) {
-            pendingPin = "";
-            setPinStage(pinStage === "setupConfirm" ? "setupFirst" : "changeFirst", "Los PIN no coinciden. Elige uno nuevo.");
-            return;
-          }
-          await savePin(enteredPin); pendingPin = "";
-          if (pinOrigin === "entry") enterApp();
-          else finishPinChange();
-          return;
+        if(pinStage==="changeCurrent") stage("changeFirst");
+        else {
+          localStorage.removeItem(PIN_SALT_KEY);
+          localStorage.removeItem(PIN_HASH_KEY);
+          localStorage.setItem(ACCESS_MODE_KEY,"none");
+          showScreen("app");
+          openSettings("Se ha quitado el PIN.");
         }
-        if (pinStage === "changeCurrent" || pinStage === "removeCurrent") {
-          if (!(await verifyPin(enteredPin))) {
-            setPinStage(pinStage, "PIN incorrecto. Inténtalo de nuevo.");
-            return;
-          }
-          if (pinStage === "changeCurrent") setPinStage("changeFirst");
-          else {
-            localStorage.removeItem(PIN_SALT_KEY);
-            localStorage.removeItem(PIN_HASH_KEY);
-            localStorage.setItem(ACCESS_MODE_KEY, "none");
-            enterApp();
-            openSettings("Se ha quitado el PIN.");
-          }
-        }
-      } catch (error) {
-        console.error("No se pudo procesar el PIN:", error);
-        setPinStage(pinStage, "No se pudo guardar el PIN. Comprueba el navegador e inténtalo de nuevo.");
       }
+    } catch(error) {
+      console.error("Nexo PIN:",error);
+      stage(pinStage,"No se pudo procesar el PIN. Inténtalo de nuevo.");
     }
+  }
 
-    function renderReleaseHistory() {
-      const historyList = document.getElementById("update-history");
-      historyList.replaceChildren();
-      RELEASE_HISTORY.forEach((update) => {
-        const item = document.createElement("li");
-        const heading = document.createElement("strong");
-        heading.textContent = "v" + update.version;
-        const date = document.createElement("time");
-        date.dateTime = update.date;
-        date.textContent = new Intl.DateTimeFormat("es", { day: "numeric", month: "short", year: "numeric", timeZone: "UTC" }).format(new Date(update.date + "T12:00:00Z"));
-        const note = document.createElement("p");
-        note.textContent = update.note;
-        item.append(heading, date, note);
-        historyList.append(item);
-      });
+  function renderHistory() {
+    const list=$("update-history");
+    list.replaceChildren();
+    RELEASE_HISTORY.forEach(item=>{
+      const li=document.createElement("li");
+      const strong=document.createElement("strong");
+      strong.textContent="v"+item.version;
+      const time=document.createElement("time");
+      time.dateTime=item.date;
+      time.textContent=new Intl.DateTimeFormat("es",{day:"numeric",month:"short",year:"numeric",timeZone:"UTC"}).format(new Date(item.date+"T12:00:00Z"));
+      const p=document.createElement("p");
+      p.textContent=item.note;
+      li.append(strong,time,p);
+      list.append(li);
+    });
+  }
+
+  function openSettings(message="") {
+    const hasPin=localStorage.getItem(ACCESS_MODE_KEY)==="pin";
+    $("settings-version").textContent=APP_VERSION;
+    $("access-summary").textContent=hasPin?"Acceso protegido con PIN.":"Acceso sin PIN.";
+    $("configure-pin").textContent=hasPin?"Cambiar PIN":"Configurar PIN";
+    $("remove-pin").hidden=!hasPin;
+    $("settings-message").textContent=message;
+    renderHistory();
+    settings.showModal();
+  }
+
+  enter.addEventListener("click",beginEntry);
+  $("choose-pin").addEventListener("click",()=>startPin("setup","entry"));
+  $("choose-no-pin").addEventListener("click",()=>{
+    localStorage.setItem(ACCESS_MODE_KEY,"none");
+    showScreen("app");
+  });
+  $("access-back").addEventListener("click",()=>showScreen("welcome"));
+  $("leave-button").addEventListener("click",()=>showScreen("welcome"));
+  $("pin-cancel").addEventListener("click",()=>{
+    pendingPin="";
+    if(pinOrigin==="settings") showScreen("app");
+    else if(pinStage==="login") showScreen("welcome");
+    else showScreen("choice");
+  });
+  document.querySelector(".pin-keypad").addEventListener("click",event=>{
+    const b=event.target.closest("button[data-digit]");
+    if(!b || pinBuffer.length>=4) return;
+    pinBuffer+=b.dataset.digit;
+    dots();
+    if(pinBuffer.length===4) setTimeout(processPin,120);
+  });
+  $("pin-delete").addEventListener("click",()=>{
+    pinBuffer=pinBuffer.slice(0,-1);
+    dots();
+    $("pin-error").textContent="";
+  });
+  $("settings-button").addEventListener("click",()=>openSettings());
+  $("configure-pin").addEventListener("click",()=>{
+    const hasPin=localStorage.getItem(ACCESS_MODE_KEY)==="pin";
+    settings.close();
+    startPin(hasPin?"change":"setup","settings");
+  });
+  $("remove-pin").addEventListener("click",()=>{
+    settings.close();
+    startPin("remove","settings");
+  });
+
+  connection();
+  window.addEventListener("online",connection);
+  window.addEventListener("offline",connection);
+
+  const isApple=/iphone|ipad|ipod/i.test(navigator.userAgent)||(navigator.platform==="MacIntel"&&navigator.maxTouchPoints>1);
+  const isInstalled=window.matchMedia("(display-mode: standalone)").matches || navigator.standalone===true;
+  window.addEventListener("beforeinstallprompt",event=>{
+    event.preventDefault();
+    installPrompt=event;
+    install.hidden=isInstalled;
+  });
+  window.addEventListener("appinstalled",()=>{
+    installPrompt=null;
+    install.hidden=true;
+  });
+  if(isApple && !isInstalled) install.hidden=false;
+  install.addEventListener("click",async()=>{
+    if(installPrompt){
+      installPrompt.prompt();
+      await installPrompt.userChoice;
+      installPrompt=null;
+      install.hidden=true;
+    } else if(isApple) {
+      alert("Para instalar Nexo, pulsa Compartir y luego “Añadir a pantalla de inicio”.");
     }
+  });
 
-    function openSettings(message) {
-      const hasPin = localStorage.getItem(ACCESS_MODE_KEY) === "pin";
-      document.getElementById("settings-version").textContent = APP_VERSION;
-      document.getElementById("access-summary").textContent = hasPin ? "Acceso protegido con PIN." : "Acceso sin PIN.";
-      document.getElementById("configure-pin").textContent = hasPin ? "Cambiar PIN" : "Configurar PIN";
-      document.getElementById("remove-pin").hidden = !hasPin;
-      document.getElementById("settings-message").textContent = message || "";
-      renderReleaseHistory();
-      settingsDialog.showModal();
-    }
+  if("serviceWorker" in navigator){
+    navigator.serviceWorker.register("./sw.js?v=0.7.1").catch(err=>console.error("Nexo SW:",err));
+  }
 
-    enterButton.addEventListener("click", beginEntry);
-    document.getElementById("choose-pin").addEventListener("click", () => startPinFlow("setup", "entry"));
-    document.getElementById("choose-no-pin").addEventListener("click", () => {
-      localStorage.setItem(ACCESS_MODE_KEY, "none");
-      enterApp();
-    });
-    document.getElementById("access-back").addEventListener("click", () => showScreen("welcome"));
-    document.getElementById("leave-button").addEventListener("click", () => showScreen("welcome"));
-    document.getElementById("pin-cancel").addEventListener("click", () => {
-      pendingPin = "";
-      if (pinOrigin === "settings") enterApp();
-      else if (pinAction === "login") showScreen("welcome");
-      else showScreen("choice");
-    });
-    document.querySelector(".pin-keypad").addEventListener("click", (event) => {
-      const digitButton = event.target.closest("button[data-digit]");
-      if (!digitButton || pinBuffer.length >= 4) return;
-      pinBuffer += digitButton.dataset.digit;
-      renderPinDots();
-      if (pinBuffer.length === 4) window.setTimeout(processPin, 120);
-    });
-    document.getElementById("pin-delete").addEventListener("click", () => {
-      pinBuffer = pinBuffer.slice(0, -1);
-      renderPinDots();
-      document.getElementById("pin-error").textContent = "";
-    });
-    settingsButton.addEventListener("click", () => openSettings());
-    document.getElementById("configure-pin").addEventListener("click", () => {
-      const action = localStorage.getItem(ACCESS_MODE_KEY) === "pin" ? "change" : "setup";
-      settingsDialog.close();
-      startPinFlow(action, "settings");
-    });
-    document.getElementById("remove-pin").addEventListener("click", () => {
-      settingsDialog.close();
-      startPinFlow("remove", "settings");
-    });
+  // Primera pantalla siempre estable, incluso si otro módulo falla después.
+  showScreen("welcome");
+})();
+</script>
 
-    updateConnectionStatus();
-    window.addEventListener("online", updateConnectionStatus);
-    window.addEventListener("offline", updateConnectionStatus);
-    if (isAppleMobile && !isInstalled) installButton.hidden = false;
-    window.addEventListener("beforeinstallprompt", (event) => {
-      event.preventDefault();
-      installPrompt = event;
-      installButton.hidden = isInstalled;
-    });
-    window.addEventListener("appinstalled", () => {
-      installPrompt = null;
-      installButton.hidden = true;
-    });
-    installButton.addEventListener("click", async () => {
-      if (installPrompt) {
-        installPrompt.prompt();
-        await installPrompt.userChoice;
-        installPrompt = null;
-        installButton.hidden = true;
-      } else if (isAppleMobile) {
-        alert("Para instalar Nexo, pulsa Compartir y luego “Añadir a pantalla de inicio”.");
-      }
-    });
-    if ("serviceWorker" in navigator) {
-      navigator.serviceWorker.register("./sw.js").catch((error) => console.error("No se pudo registrar el service worker:", error));
-    }
-  </script>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="./mvp.js?v=0.5.0"></script><script src="./cloud.js?v=0.6.0"></script></body>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="./mvp.js?v=0.7.0"></script>
+<script src="./cloud.js?v=0.7.0"></script>
+</body>
 </html>
-
